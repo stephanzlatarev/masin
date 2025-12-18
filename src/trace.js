@@ -1,6 +1,9 @@
 import Game from "./game.js";
 import Fist from "./fist.js";
+import Lane from "./lane.js";
 import Route from "./route.js";
+import Units from "./units.js";
+import Zone from "./zone.js";
 
 const text = [];
 const shapes = [];
@@ -37,23 +40,69 @@ function showZone() {
     section = Route.projected[0];
   }
 
-  if (section) {
-    const lane = section.blind;
+  shapes.push({
+    shape: "polygon",
+    points: [
+      Zone.front.left, Zone.front.top,
+      Zone.front.right, Zone.front.top,
+      Zone.front.right, Zone.front.bottom,
+      Zone.front.left, Zone.front.bottom,
+    ],
+    color: "#00DD00",
+    filled: true,
+  });
+  shapes.push({
+    shape: "polygon",
+    points: [
+      Zone.center.left, Zone.center.top,
+      Zone.center.right, Zone.center.top,
+      Zone.center.right, Zone.center.bottom,
+      Zone.center.left, Zone.center.bottom,
+    ],
+    color: "#00DDDD",
+    filled: true,
+  });
+  shapes.push({
+    shape: "polygon",
+    points: [
+      Zone.back.left, Zone.back.top,
+      Zone.back.right, Zone.back.top,
+      Zone.back.right, Zone.back.bottom,
+      Zone.back.left, Zone.back.bottom,
+    ],
+    color: "#0000DD",
+    filled: true,
+  });
 
-    if (lane) {
+  let shade = 255;
+  for (const lane of Lane.enemyHarvestLanes) {
+    shade -= 10;
+
+    const target = lane.getTarget();
+    const color = target ? "black" : `rgb(${shade},${shade},${shade})`;
+
+    shapes.push({
+      shape: "line",
+      width: 0.375,
+      x1: lane.a.x, y1: lane.a.y,
+      x2: lane.b.x, y2: lane.b.y,
+      opacity: 1,
+      color,
+    });
+
+    for (const unit of Units.enemies.values()) {
+      if (unit.radius > 0.5) continue;
+      if (!lane.includes(unit.pos)) continue;
+
+      const color = (unit === target) ? "black" : "green";
+
       shapes.push({
-        shape: "line",
-        width: 0.5,
-        x1: lane.a.x, y1: lane.a.y,
-        x2: lane.b.x, y2: lane.b.y,
-        color: "green",
-      });
-      shapes.push({
-        shape: "arrow",
-        width: 0.5,
-        x1: lane.a.x, y1: lane.a.y,
-        x2: lane.b.x, y2: lane.b.y,
-        color: "yellow",
+        shape: "circle",
+        r: 0.5,
+        x: unit.pos.x, y: unit.pos.y,
+        filled: true,
+        opacity: 1,
+        color,
       });
     }
   }

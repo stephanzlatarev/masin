@@ -3,6 +3,18 @@ class Command {
 
   commands = [];
 
+  amove(units, pos) {
+    for (const unit of units) {
+      if (unit.order.abilityId !== 23) {
+        return this.commands.push({
+          unitTags: units.map(unit => unit.tag),
+          abilityId: 23,
+          targetWorldSpacePos: { x: pos.x, y: pos.y },
+        });
+      }
+    }
+  }
+
   attack(unit, target) {
     if ((unit.order.abilityId === 23) && (unit.order.targetUnitTag === target.tag)) return;
 
@@ -49,7 +61,7 @@ class Command {
   move(unit, pos) {
     if ((unit.order.abilityId === 16) && unit.order.targetWorldSpacePos && (unit.order.targetWorldSpacePos.x === pos.x) && (unit.order.targetWorldSpacePos.y === pos.y)) return;
 
-    this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetWorldSpacePos: pos });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetWorldSpacePos: { x: pos.x, y: pos.y } });
   }
 
   repair(unit, target) {
@@ -67,6 +79,20 @@ class Command {
   strike(units, target, resource) {
     this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 23, targetUnitTag: target.tag });
     this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 295, targetUnitTag: resource.tag, queueCommand: true });
+  }
+
+  land(unit) {
+    if (unit.order.abilityId === 419) return;
+
+    this.commands.push({ unitTags: [unit.tag], abilityId: 419, targetWorldSpacePos: unit.pos });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 413, queueCommand: true });
+  }
+
+  lift(unit) {
+    if (unit.order.abilityId === 417) return;
+
+    this.commands.push({ unitTags: [unit.tag], abilityId: 416 });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 417, queueCommand: true });
   }
 
   clear() {

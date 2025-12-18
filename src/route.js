@@ -1,5 +1,7 @@
+import Circuit from "./circuit.js";
 import Fist from "./fist.js";
 import Game from "./game.js";
+import Lane from "./lane.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 
@@ -15,14 +17,18 @@ class Route {
 
   start() {
     this.destination = findEnemyMineral();
+    this.enemy = this.destination;
 
     sources = Game.units.filter(unit => (unit.mineralContents && (unit.displayType === 1)));
   }
 
   sync() {
-    syncUnits(this);
+    this.destination = syncMineral(this.destination);
+    this.enemy = this.destination;
 
     if (this.complete) return;
+
+    if (scout) scout = Units.get(scout.tag);
 
     if (this.sections.length) {
       findNextSection(this.sections);
@@ -32,6 +38,9 @@ class Route {
       if (route) {
         this.source = route.source;
         this.destination = route.destination;
+
+        this.home = this.source;
+        this.enemy = this.destination;
       }
     }
 
@@ -43,16 +52,13 @@ class Route {
 
       section.extend(this.destination.pos, calculateDistance(lastpos, this.destination.pos));
 
-      const lane = Zone.getBlindPath(section);
-      const { point, length } = findCrossing(section, lane);
-
-      section.blind = lane;
-      section.extend(point, length);
-      lane.a = point;
-
       this.sections.push(section);
       this.projected.length = 0;
       this.complete = true;
+
+      Zone.init(scout.pos);
+      Lane.order(scout.pos);
+      Circuit.init();
 
       scout = null;
     }
@@ -61,18 +67,6 @@ class Route {
     this.section = this.sections[this.index];
   }
 
-}
-
-function syncUnits(route) {
-  route.destination = syncMineral(route.destination);
-
-  for (const section of route.sections) {
-    if (section.blind) {
-      section.blind.target = syncMineral(section.blind.target);
-    }
-  }
-  
-  if (scout) scout = Units.get(scout.tag);
 }
 
 class Section {
@@ -224,16 +218,6 @@ function findNextSection(sections) {
 
 function didTurn(worker) {
   return (Math.abs(worker.facing - worker.lastfacing) > 0.01);
-}
-
-function findCrossing(section, lane) {
-  // Assume lane is horizontal
-  const factor = (lane.a.y - section.a.y) / (section.b.y - section.a.y);
-  const length = section.length * factor;
-  const x = section.a.x + (section.b.x - section.a.x) * factor;
-  const y = lane.a.y;
-
-  return { point: { x, y }, length };
 }
 
 function calculateDistance(a, b) {

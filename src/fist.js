@@ -1,10 +1,13 @@
 import Clench from "./clench.js";
+import Circuit from "./circuit.js";
 import Command from "./command.js";
-import Intercept from "./intercept.js";
+import Game from "./game.js";
+import Lane from "./lane.js";
 import Repair from "./repair.js";
 import Route from "./route.js";
 import Strike from "./strike.js";
 import Units from "./units.js";
+import Zone from "./zone.js";
 
 class Fist {
 
@@ -27,6 +30,8 @@ class Fist {
 
     this.workers = [...workers];
     this.pos = this.workers[0].pos;
+    this.x = this.pos.x;
+    this.y = this.pos.y;
 
     this.act();
   }
@@ -40,7 +45,7 @@ class Fist {
   move() {
     Command.head(this.workers, Route.destination);
 
-    if (Route.complete && isEnemyInSight()) {
+    if (Route.complete && (Zone.includes(this) || isEnemyInSight())) {
       this.transition("clench");
     }
   }
@@ -49,6 +54,8 @@ class Fist {
     Clench.run();
 
     if (Clench.done()) {
+      Circuit.reset();
+
       this.transition("seek");
     }
   }
@@ -62,6 +69,7 @@ class Fist {
       return this.transition("clench");
     }
 
+    // Kill enemy workers in fire range
     this.victim = Strike.getTarget();
 
     if (this.victim) {
@@ -70,7 +78,26 @@ class Fist {
       return this.transition("strike");
     }
 
-    Intercept.move();
+    // Kill enemy workers on the harvest lanes
+    for (const lane of Lane.enemyHarvestLanes) {
+      const target = lane.getTarget();
+
+      if (target) {
+        return Command.head(this.workers, lane.mineral);
+      }
+    }
+
+    // If no enemy workers are near the enemy depot building then destroy it
+    if (Zone.center.includes(this) && !isEnemyInSight()) {
+      return this.transition("smash");
+    }
+
+    // Move inside the enemy zone searching for enemy workers
+    if (Zone.includes(this)) {
+      Circuit.move();
+    } else {
+      Command.head(this.workers, Route.destination);
+    }
   }
 
   strike() {
@@ -86,7 +113,10 @@ class Fist {
     let rallying = 0;
 
     for (const worker of this.workers) {
-      if (worker.orders[0]?.abilityId === 295) {
+      if (Zone.center.includes(worker.pos)) continue;
+      if (Zone.back.includes(worker.pos)) continue;
+
+      if (worker.order.abilityId === 295) {
         rallying++;
       }
     }
@@ -107,6 +137,47 @@ class Fist {
       Command.head(this.workers, Route.source);
     } else {
       Repair.run();
+    }
+  }
+
+  smash() {
+    if (isEnemyInSight()) {
+      return this.transition("seek");
+    }
+
+    for (const worker of this.workers) {
+      if (Math.abs(worker.pos.x - Game.enemy.x) > 2) continue;
+      if (Math.abs(worker.pos.y - Game.enemy.y) > 2) continue;
+
+      // A worker of ours is at the spot of the enemy base and there's nothing there
+      return this.transition("cleanup");
+    }
+
+    Command.amove(this.workers, Game.enemy);
+  }
+
+  cleanup() {
+    if (this.victim) this.victim = Units.get(this.victim.tag);
+
+    if (this.victim) {
+      Command.amove(this.workers, this.victim.pos);
+    } else if (Units.enemies.size) {
+      // if not flying
+      for (const enemy of Units.enemies.values()) {
+        if (enemy.isFlying) continue;
+
+        this.victim = enemy;
+        Command.amove(this.workers, this.victim.pos);
+      }
+    } else {
+      for (const one of this.workers) {
+        if (!one.order.abilityId) {
+          const x = Game.left + (Game.right - Game.left) * Math.random();
+          const y = Game.top + (Game.bottom - Game.top) * Math.random();
+
+          Command.amove([one], { x, y });
+        }
+      }
     }
   }
 

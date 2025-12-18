@@ -24,7 +24,7 @@ class Units {
           }
 
           workers.set(unit.tag, unit);
-        } else if (unit.radius > 2.5) {
+        } else if (unit.radius >= 2.5) {
           this.base = unit;
         }
 

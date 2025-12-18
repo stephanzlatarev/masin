@@ -1,6 +1,8 @@
 import Game from "./game.js";
 import Hire from "./hire.js";
 import Fist from "./fist.js";
+import Lane from "./lane.js";
+import Liftoff from "./liftoff.js";
 import Route from "./route.js";
 import Trace from "./trace.js";
 import Units from "./units.js";
@@ -22,22 +24,24 @@ console.log = function() {
 async function play() {
   await Game.connect();
 
+  Lane.start();
   Route.start();
   Hire.start();
 
   while (true) {
     Units.sync();
 
-    // TODO: 9 vs Terran, 8 vs Protoss/Zerg
     if (Fist.workers.length < 9) {
       // We lost our fist
       await Game.end();
       break;
     }
 
+    Lane.sync();
     Route.sync();
     Hire.sync();
     Fist.sync();
+    Liftoff.sync();
 
     await Game.run();
     await Trace.show();

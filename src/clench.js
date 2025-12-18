@@ -9,6 +9,7 @@ const CLENCH_MARGIN = SPEED + SPEED;
 const BLOCK_MARGIN = 0.375 + 0.375 + 0.15; // Radius of two SCV and some buffer
 const RANKS_MARGIN = BLOCK_MARGIN * 3;
 const MIN_ALIGN = 0.1;
+const MAX_DISTANCE = 4;
 
 class Clench {
 
@@ -40,6 +41,7 @@ class Clench {
       if (projection.s <= 0) continue;
       if (projection.s >= Route.section.length) continue;
       if (projection.h <= MIN_ALIGN) continue;
+      if (projection.h >= MAX_DISTANCE) continue;
       if (isPathBlocked(worker, projection)) continue;
 
       eligible.add(worker);
@@ -69,11 +71,15 @@ class Clench {
     }
 
     // Select the direction for each worker to align with the rest
-    const back = Math.min(tail + SPEED, right + SPEED);
+    // TODO: Prepare the section such that the workers cannot reach the minerals
+    const back = Math.min(tail + SPEED, right + SPEED, Route.section.length - RANKS_MARGIN);
     for (const worker of Fist.workers) {
       const projection = worker.projection;
 
-      if (projection.s <= 0) {
+      if (projection.h >= MAX_DISTANCE) {
+        // The worker is far away from the section and may get stuck clenching
+        worker.direction = Route.source;
+      } else if (projection.s <= 0) {
         // The worker is before the section
         worker.direction = Route.destination;
       } else if (projection.s >= Route.section.length) {

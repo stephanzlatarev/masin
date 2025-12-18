@@ -29,7 +29,15 @@ class Game {
     Trace.on = true;
 
     console.log("Playing...");
-    this.enemy = (await this.client.gameInfo()).startRaw.startLocations[0];
+    const gameInfo = await this.client.gameInfo();
+    const playableArea = gameInfo.startRaw.playableArea;
+
+    this.left = playableArea.p0.x;
+    this.top = playableArea.p0.y;
+    this.right = playableArea.p1.x;
+    this.bottom = playableArea.p1.y;
+
+    this.enemy = gameInfo.startRaw.startLocations[0];
     this.units = (await this.client.observation()).observation.rawData.units;
   }
 
