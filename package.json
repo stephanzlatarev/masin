@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node ./src/play.js"
+    "start": "node ./masin.js"
   },
   "dependencies": {
     "@node-sc2/proto": "^0.6.0-alpha.0"

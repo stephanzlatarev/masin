@@ -21,7 +21,7 @@ console.log = function() {
   print(`${mm}:${ss}/${Game.loop}`, ...arguments);
 }
 
-async function play() {
+export default async function() {
   await Game.connect();
 
   Lane.start();
@@ -47,5 +47,3 @@ async function play() {
     await Trace.show();
   }
 }
-
-play();
