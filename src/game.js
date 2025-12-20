@@ -1,10 +1,13 @@
 import starcraft from "@node-sc2/proto";
 import Commands from "./command.js";
+import Delay from "./delay.js";
 import Trace from "./trace.js";
 
 class Game {
 
   client = starcraft();
+  logCommands = false;
+  showTrace = false;
 
   loop = 0;
   units = [];
@@ -32,6 +35,12 @@ class Game {
 
       console.log("Joining game...");
       await this.client.joinGame(player);
+
+      // Handle real ladder delay
+      Delay.real();
+
+      // Log commands on ladder
+      this.logCommands = true;
     } else {
       console.log("Connecting to local StarCraft II game...");
       for (let i = 0; i < 12; i++) {
@@ -47,7 +56,10 @@ class Game {
       await this.client.joinGame({ race: 1, options: { raw: true, score: true } });
 
       console.log("Tracing...");
-      Trace.on = true;
+      this.showTrace = true;
+
+      // Simulate ladder delay
+      Delay.simulate();
     }
 
     console.log("Playing...");
@@ -64,10 +76,23 @@ class Game {
   }
 
   async run() {
-    await this.client.action({ actions: Commands.actions() });
+    const commands = Delay.commands(Commands.commands);
+
+    if (this.logCommands) {
+      for (const command of commands) {
+        console.log("[command]", JSON.stringify(command));
+      }
+    }
+
+    if (this.showTrace) {
+      await Trace.show();
+    }
+
+    await this.client.action({ actions: commands.map(command => ({ actionRaw: { unitCommand: command } })) });
     await this.client.step({ count: 1 });
 
-    Commands.clear();
+    Commands.step();
+    Delay.step();
 
     const response = await this.client.observation();
     const observation = response.observation;

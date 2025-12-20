@@ -73,7 +73,7 @@ class Fist {
     this.victim = Strike.getTarget();
 
     if (this.victim) {
-      Command.strike(this.workers, this.victim, Route.destination);
+      Command.strike(this.workers, this.victim, Route.destination, Route.destination.pos);
 
       return this.transition("strike");
     }
@@ -83,7 +83,7 @@ class Fist {
       const target = lane.getTarget();
 
       if (target) {
-        return Command.head(this.workers, lane.mineral);
+        return Command.head(this.workers, lane.mineral, lane.mineral.pos);
       }
     }
 
@@ -96,7 +96,7 @@ class Fist {
     if (Zone.includes(this)) {
       Circuit.move();
     } else {
-      Command.head(this.workers, Route.destination);
+      Command.head(this.workers, Route.destination, Route.section.b);
     }
   }
 
@@ -132,9 +132,9 @@ class Fist {
 
   repair() {
     if (Repair.isComplete()) {
-      this.transition("clench");
+      this.transition("move");
     } else if (getNearEnemyCount(this) >= 3) {
-      Command.head(this.workers, Route.source);
+      Command.head(this.workers, Route.source, Route.section.a);
     } else {
       Repair.run();
     }

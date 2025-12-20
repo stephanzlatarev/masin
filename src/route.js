@@ -44,7 +44,7 @@ class Route {
       }
     }
 
-    if (scout && (calculateDistance(scout.pos, Game.enemy) < end)) {
+    if (scout && (calculateDistance(scout.realpos, Game.enemy) < end)) {
       // The scout reached the enemy base. Complete the route.
       const current = this.sections[this.sections.length - 1];
       const lastpos = current.next || current.b;
@@ -56,8 +56,8 @@ class Route {
       this.projected.length = 0;
       this.complete = true;
 
-      Zone.init(scout.pos);
-      Lane.order(scout.pos);
+      Zone.init(scout.realpos);
+      Lane.order(scout.realpos);
       Circuit.init();
 
       scout = null;
@@ -176,13 +176,13 @@ function findFirstSection(sections, projected) {
   for (const worker of Fist.workers) {
     if (!didTurn(worker)) continue;
 
-    if (calculateDistance(worker.pos, Units.base.pos) > 6) {
-      const source = findSourceMineral(worker.lastpos);
+    if (calculateDistance(worker.realpos, Units.base.pos) > 6) {
+      const source = findSourceMineral(worker.realpos);
       const destination = findDestinationMineral(source);
-      const enemyRamp = getSymmetricalPos(worker.lastpos);
+      const enemyRamp = getSymmetricalPos(worker.realpos);
 
-      sections.push(new Section(source.pos, worker.lastfacing).extend(worker.lastpos));
-      sections.push(new Section(worker.pos, worker.facing));
+      sections.push(new Section(source.pos, worker.lastfacing).extend(worker.realpos));
+      sections.push(new Section(worker.realpos, worker.facing));
 
       const length = calculateDistance(enemyRamp, destination.pos);
       projected.push(new Section(enemyRamp).extend(destination.pos, length));
@@ -200,19 +200,19 @@ function findNextSection(sections) {
 
   const current = sections[sections.length - 1];
   const lastpos = current.straight ? current.a : current.next;
-  const length = calculateDistance(lastpos, scout.lastpos);
+  const length = calculateDistance(lastpos, scout.lastrealpos);
 
   if (length < 1) {
     // This is part of a turn
-    current.bend(scout.lastpos, scout.pos);
+    current.bend(scout.lastrealpos, scout.realpos);
   } else if (current.straight) {
     // Update a section bud
-    current.extend(scout.lastpos, length);
-    sections.push(new Section(scout.pos, scout.facing));
+    current.extend(scout.lastrealpos, length);
+    sections.push(new Section(scout.realpos, scout.facing));
   } else {
     // Add a section after a bend
-    sections.push(new Section(current.next, scout.lastfacing).extend(scout.lastpos, length));
-    sections.push(new Section(scout.pos, scout.facing));
+    sections.push(new Section(current.next, scout.lastfacing).extend(scout.lastrealpos, length));
+    sections.push(new Section(scout.realpos, scout.facing));
   }
 }
 

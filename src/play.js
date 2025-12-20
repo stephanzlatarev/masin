@@ -1,10 +1,10 @@
+import Defense from "./defense.js";
 import Game from "./game.js";
 import Hire from "./hire.js";
 import Fist from "./fist.js";
 import Lane from "./lane.js";
 import Liftoff from "./liftoff.js";
 import Route from "./route.js";
-import Trace from "./trace.js";
 import Units from "./units.js";
 
 const LOOPS_PER_SECOND = 22.4;
@@ -41,9 +41,9 @@ export default async function() {
     Route.sync();
     Hire.sync();
     Fist.sync();
+    Defense.sync();
     Liftoff.sync();
 
     await Game.run();
-    await Trace.show();
   }
 }

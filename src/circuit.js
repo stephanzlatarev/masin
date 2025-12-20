@@ -49,7 +49,10 @@ class Circuit {
       turn = this.turns[this.index];
     }
 
-    Command.head(Fist.workers, getMineral(turn.mineral));
+    const mineral = getMineral(turn.mineral);
+    const direction = (mineral === Route.home) ? Route.section.a : mineral.pos;
+
+    Command.head(Fist.workers, mineral, direction);
   }
 
   reset() {

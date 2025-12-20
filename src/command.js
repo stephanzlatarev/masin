@@ -4,107 +4,55 @@ class Command {
   commands = [];
 
   amove(units, pos) {
-    for (const unit of units) {
-      if (unit.order.abilityId !== 23) {
-        return this.commands.push({
-          unitTags: units.map(unit => unit.tag),
-          abilityId: 23,
-          targetWorldSpacePos: { x: pos.x, y: pos.y },
-        });
-      }
-    }
+    this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 23, targetWorldSpacePos: { x: pos.x, y: pos.y }, direction: { x: pos.x, y: pos.y } });
   }
 
   attack(unit, target) {
-    if ((unit.order.abilityId === 23) && (unit.order.targetUnitTag === target.tag)) return;
-
-    this.commands.push({ unitTags: [unit.tag], abilityId: 23, targetUnitTag: target.tag });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 23, targetUnitTag: target.tag, direction: { x: target.pos.x, y: target.pos.y } });
   }
 
-  follow(unit, target) {
-    if (target.health < target.healthMax) {
-      if ((unit.order.abilityId === 3685) && (unit.order.targetUnitTag === target.tag)) return;
-
-      this.commands.push({ unitTags: [unit.tag], abilityId: 3685, targetUnitTag: target.tag });
-    } else {
-      if ((unit.order.abilityId === 16) && (unit.order.targetUnitTag === target.tag)) return;
-
-      this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetUnitTag: target.tag });
-    }
+  harvest(unit, resource, direction) {
+    this.commands.push({ unitTags: [unit.tag], abilityId: 295, targetUnitTag: resource.tag, direction });
   }
 
-  harvest(unit, resource) {
-    if ((unit.order.abilityId === 295) && (unit.order.targetUnitTag === resource.tag)) return;
-
-    this.commands.push({ unitTags: [unit.tag], abilityId: 295, targetUnitTag: resource.tag });
+  align(unit, via, resource, direction) {
+    this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetWorldSpacePos: { x: via.x, y: via.y }, direction: { x: via.x, y: via.y } });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 295, targetUnitTag: resource.tag, queueCommand: true, direction });
   }
 
-  align(unit, via, resource) {
-    this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetWorldSpacePos: { x: via.x, y: via.y } });
-    this.commands.push({ unitTags: [unit.tag], abilityId: 295, targetUnitTag: resource.tag, queueCommand: true });
-  }
-
-  head(units, resource) {
-    const unitTags = [];
-
-    for (const unit of units) {
-      if ((unit.order.abilityId === 295) && (unit.order.targetUnitTag === resource.tag)) continue;
-
-      unitTags.push(unit.tag);
-    }
-
-    if (unitTags.length) {
-      this.commands.push({ unitTags, abilityId: 295, targetUnitTag: resource.tag });
-    }
+  head(units, resource, direction) {
+    this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 295, targetUnitTag: resource.tag, direction });
   }
 
   move(unit, pos) {
-    if ((unit.order.abilityId === 16) && unit.order.targetWorldSpacePos && (unit.order.targetWorldSpacePos.x === pos.x) && (unit.order.targetWorldSpacePos.y === pos.y)) return;
-
-    this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetWorldSpacePos: { x: pos.x, y: pos.y } });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 16, targetWorldSpacePos: { x: pos.x, y: pos.y }, direction: { x: pos.x, y: pos.y } });
   }
 
   repair(unit, target) {
-    if ((unit.order.abilityId === 3685) && (unit.order.targetUnitTag === target.tag)) return;
-
     this.commands.push({ unitTags: [unit.tag], abilityId: 3685, targetUnitTag: target.tag });
   }
 
   stop(unit) {
-    if (!unit.order.abilityId) return;
-
-    this.commands.push({ unitTags: [unit.tag], abilityId: 3665 });
+    this.commands.push({ unitTags: [unit.tag], abilityId: 3665, direction: { x: unit.pos.x, y: unit.pos.y } });
   }
 
-  strike(units, target, resource) {
-    this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 23, targetUnitTag: target.tag });
-    this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 295, targetUnitTag: resource.tag, queueCommand: true });
+  strike(units, target, resource, direction) {
+    this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 23, targetUnitTag: target.tag, direction: { x: target.pos.x, y: target.pos.y } });
+    this.commands.push({ unitTags: units.map(unit => unit.tag), abilityId: 295, targetUnitTag: resource.tag, queueCommand: true, direction });
   }
 
   land(unit) {
-    if (unit.order.abilityId === 419) return;
-
     this.commands.push({ unitTags: [unit.tag], abilityId: 419, targetWorldSpacePos: unit.pos });
     this.commands.push({ unitTags: [unit.tag], abilityId: 413, queueCommand: true });
   }
 
   lift(unit) {
-    if (unit.order.abilityId === 417) return;
-
     this.commands.push({ unitTags: [unit.tag], abilityId: 416 });
     this.commands.push({ unitTags: [unit.tag], abilityId: 417, queueCommand: true });
   }
 
-  clear() {
+  step() {
     this.commands.length = 0;
-  }
-
-  actions() {
-   for (const command of this.commands) {
-     console.log("[command]", JSON.stringify(command));
-   }
-
-    return this.commands.map(command => ({ actionRaw: { unitCommand: command } }));
   }
 
 }

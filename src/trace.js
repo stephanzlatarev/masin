@@ -10,11 +10,7 @@ const shapes = [];
 
 class Trace {
 
-  on = false;
-
   async show() {
-    if (!this.on) return;
-
     text.length = 0;
     shapes.length = 0;
 
@@ -98,9 +94,19 @@ function showZone() {
 
       shapes.push({
         shape: "circle",
+        r: 0.45,
+        x: unit.realpos.x, y: unit.realpos.y,
+        filled: false,
+        width: 0.05,
+        opacity: 1,
+        color: "white",
+      });
+      shapes.push({
+        shape: "circle",
         r: 0.5,
         x: unit.pos.x, y: unit.pos.y,
-        filled: true,
+        filled: false,
+        width: 0.05,
         opacity: 1,
         color,
       });
@@ -145,6 +151,8 @@ function showRoute() {
 }
 
 function showFist() {
+  if (!Fist.workers) return;
+
   const anchor = Fist.workers[0];
   if (!anchor) return;
 
@@ -159,6 +167,25 @@ function showFist() {
     ];
 
     text.push(line.join(" "));
+
+    shapes.push({
+      shape: "circle",
+      r: 0.45,
+      x: worker.realpos.x, y: worker.realpos.y,
+      filled: false,
+      width: 0.05,
+      opacity: 1,
+      color: "white",
+    });
+    shapes.push({
+      shape: "circle",
+      r: 0.5,
+      x: worker.pos.x, y: worker.pos.y,
+      filled: false,
+      width: 0.05,
+      opacity: 1,
+      color: "black",
+    });
   }
   text.push("");
 
@@ -186,6 +213,8 @@ function getFistColor() {
 }
 
 function showClench() {
+  if (!Fist.workers) return;
+
   for (const worker of Fist.workers) {
     if (!worker.projection) continue;
 

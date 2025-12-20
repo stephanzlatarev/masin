@@ -79,26 +79,31 @@ class Clench {
       if (projection.h >= MAX_DISTANCE) {
         // The worker is far away from the section and may get stuck clenching
         worker.direction = Route.source;
+        worker.directionPos = Route.section.a;
       } else if (projection.s <= 0) {
         // The worker is before the section
         worker.direction = Route.destination;
+        worker.directionPos = Route.section.b;
       } else if (projection.s >= Route.section.length) {
         // The worker is after the section
         worker.direction = Route.source;
+        worker.directionPos = Route.section.a;
       } else if (worker.projection.s <= back) {
         // The worker is at the back of the fist
         worker.direction = Route.destination;
+        worker.directionPos = Route.section.b;
       } else {
         worker.direction = Route.source;
+        worker.directionPos = Route.section.a;
       }
     }
 
     // Command the workers
     for (const worker of Fist.workers) {
       if (movers.has(worker)) {
-        Command.align(worker, worker.projection, worker.direction);
+        Command.align(worker, worker.projection, worker.direction, worker.directionPos);
       } else {
-        Command.harvest(worker, worker.direction);
+        Command.harvest(worker, worker.direction, worker.directionPos);
       }
     }
   }
