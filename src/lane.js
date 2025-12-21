@@ -1,5 +1,6 @@
 import Game from "./game.js";
 import Fist from "./fist.js";
+import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 import project from "./projection.js";
@@ -18,7 +19,7 @@ export default class Lane {
   }
 
   includes(pos) {
-    const projection = project(this, pos);
+    const projection = project(this.a, this.b, this.length, pos);
 
     if (projection.s < -MAX_MARGIN) return false;
     if (projection.s > this.length + MAX_MARGIN) return false;
@@ -41,10 +42,10 @@ export default class Lane {
     }
   }
 
-  static order(pos) {
+  static order() {
     this.enemyHarvestLanes.sort((a, b) => {
-      const angleA = Math.atan2(a.mineral.pos.y - pos.y, a.mineral.pos.x - pos.x);
-      const angleB = Math.atan2(b.mineral.pos.y - pos.y, b.mineral.pos.x - pos.x);
+      const angleA = Math.atan2(a.mineral.pos.y - Strip.ramp.y, a.mineral.pos.x - Strip.ramp.x);
+      const angleB = Math.atan2(b.mineral.pos.y - Strip.ramp.y, b.mineral.pos.x - Strip.ramp.x);
       
       // Sort clockwise (descending angle)
       return angleB - angleA;
@@ -68,13 +69,13 @@ class EnemyHarvestLane extends Lane {
   getTarget() {
     if (!this.includes(Fist)) return;
 
-    const fist = project(this, Fist);
+    const fist = project(this.a, this.b, this.length, Fist);
 
     for (const unit of Units.enemies.values()) {
       if (!unit.isWorker) continue;
       if (!this.includes(unit.pos)) continue;
 
-      const target = project(this, unit.pos);
+      const target = project(this.a, this.b, this.length, unit.pos);
 
       if (target.s > fist.s) return unit;
     }

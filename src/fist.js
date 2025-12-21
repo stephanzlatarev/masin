@@ -4,8 +4,8 @@ import Command from "./command.js";
 import Game from "./game.js";
 import Lane from "./lane.js";
 import Repair from "./repair.js";
-import Route from "./route.js";
 import Strike from "./strike.js";
+import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 
@@ -43,9 +43,9 @@ class Fist {
   }
 
   move() {
-    Command.head(this.workers, Route.destination);
+    Command.head(this.workers, Strip.mineral);
 
-    if (Route.complete && (Zone.includes(this) || isEnemyInSight())) {
+    if (Strip.length && (Zone.includes(this) || isEnemyInSight())) {
       this.transition("clench");
     }
   }
@@ -73,7 +73,7 @@ class Fist {
     this.victim = Strike.getTarget();
 
     if (this.victim) {
-      Command.strike(this.workers, this.victim, Route.destination, Route.destination.pos);
+      Command.strike(this.workers, this.victim, Strip.mineral, Strip.mineral.pos);
 
       return this.transition("strike");
     }
@@ -96,7 +96,7 @@ class Fist {
     if (Zone.includes(this)) {
       Circuit.move();
     } else {
-      Command.head(this.workers, Route.destination, Route.section.b);
+      Command.head(this.workers, Strip.mineral, Strip.mineral.pos);
     }
   }
 
@@ -134,7 +134,7 @@ class Fist {
     if (Repair.isComplete()) {
       this.transition("move");
     } else if (getNearEnemyCount(this) >= 3) {
-      Command.head(this.workers, Route.source, Route.section.a);
+      Command.head(this.workers, Strip.home, Strip.ramp);
     } else {
       Repair.run();
     }

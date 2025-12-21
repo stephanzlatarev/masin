@@ -2,6 +2,7 @@ import Circuit from "./circuit.js";
 import Fist from "./fist.js";
 import Game from "./game.js";
 import Lane from "./lane.js";
+import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 
@@ -11,88 +12,39 @@ let sources = [];
 
 class Route {
 
-  sections = [];
-  projected = [];
-  complete = false;
-
   start() {
-    this.destination = findEnemyMineral();
-    this.enemy = this.destination;
+    Strip.mineral = findEnemyMineral();
 
     sources = Game.units.filter(unit => (unit.mineralContents && (unit.displayType === 1)));
   }
 
   sync() {
-    this.destination = syncMineral(this.destination);
-    this.enemy = this.destination;
+    Strip.mineral = syncMineral(Strip.mineral);
 
-    if (this.complete) return;
+    if (Strip.length) return;
 
-    if (scout) scout = Units.get(scout.tag);
-
-    if (this.sections.length) {
-      findNextSection(this.sections);
+    if (scout) {
+      scout = Units.get(scout.tag);
     } else {
-      const route = findFirstSection(this.sections, this.projected);
+      const section = findFirstSection();
 
-      if (route) {
-        this.source = route.source;
-        this.destination = route.destination;
-
-        this.home = this.source;
-        this.enemy = this.destination;
+      if (section) {
+        Strip.home = section.source;
+        Strip.mineral = section.destination;
       }
     }
 
     if (scout && (calculateDistance(scout.realpos, Game.enemy) < end)) {
-      // The scout reached the enemy base. Complete the route.
-      const current = this.sections[this.sections.length - 1];
-      const lastpos = current.next || current.b;
-      const section = new Section(lastpos);
+      // The scout reached the enemy base. Complete the strip.
+      Strip.ramp = scout.realpos;
+      Strip.length = calculateDistance(Strip.ramp, Strip.mineral.pos);
 
-      section.extend(this.destination.pos, calculateDistance(lastpos, this.destination.pos));
-
-      this.sections.push(section);
-      this.projected.length = 0;
-      this.complete = true;
-
-      Zone.init(scout.realpos);
-      Lane.order(scout.realpos);
+      Zone.init();
+      Lane.order();
       Circuit.init();
 
       scout = null;
     }
-
-    this.index = this.sections.length - 1;
-    this.section = this.sections[this.index];
-  }
-
-}
-
-class Section {
-
-  straight = true;
-
-  constructor(a) {
-    this.a = a;
-    this.b = a;
-    this.length = 0;
-  }
-
-  extend(b, length = 1) {
-    this.b = b;
-    this.length = length;
-
-    return this;
-  }
-
-  bend(b, next) {
-    this.b = b;
-    this.next = next;
-    this.straight = false;
-    this.length = 1;
-
-    return this;
   }
 
 }
@@ -164,7 +116,7 @@ function getSymmetricalPos(pos) {
   return { x, y };
 }
 
-function findFirstSection(sections, projected) {
+function findFirstSection() {
   if (!Units.base) return;
 
   for (const worker of Fist.workers) {
@@ -175,38 +127,11 @@ function findFirstSection(sections, projected) {
       const destination = findDestinationMineral(source);
       const enemyRamp = getSymmetricalPos(worker.realpos);
 
-      sections.push(new Section(source.pos).extend(worker.realpos));
-      sections.push(new Section(worker.realpos));
-
-      const length = calculateDistance(enemyRamp, destination.pos);
-      projected.push(new Section(enemyRamp).extend(destination.pos, length));
-
       scout = worker;
       end = calculateDistance(Game.enemy, enemyRamp) - 3;
 
       return { source, destination };
     }
-  }
-}
-
-function findNextSection(sections) {
-  if (!didTurn(scout)) return;
-
-  const current = sections[sections.length - 1];
-  const lastpos = current.straight ? current.a : current.next;
-  const length = calculateDistance(lastpos, scout.lastrealpos);
-
-  if (length < 1) {
-    // This is part of a turn
-    current.bend(scout.lastrealpos, scout.realpos);
-  } else if (current.straight) {
-    // Update a section bud
-    current.extend(scout.lastrealpos, length);
-    sections.push(new Section(scout.realpos));
-  } else {
-    // Add a section after a bend
-    sections.push(new Section(current.next).extend(scout.lastrealpos, length));
-    sections.push(new Section(scout.realpos));
   }
 }
 

@@ -1,5 +1,6 @@
-import Lane from "./lane.js";
 import Game from "./game.js";
+import Lane from "./lane.js";
+import Strip from "./strip.js";
 
 class Zone {
 
@@ -8,12 +9,12 @@ class Zone {
   center = new Box();
   back = new Box();
 
-  init(ramp) {
+  init() {
     const center = getCenter();
     const horizontal = new Box(center.left, center.top, center.right, center.bottom);
     const vertical = new Box(center.left, center.top, center.right, center.bottom);
-    const adx = Math.abs(ramp.x - Game.enemy.x);
-    const ady = Math.abs(ramp.y - Game.enemy.y);
+    const adx = Math.abs(Strip.ramp.x - Game.enemy.x);
+    const ady = Math.abs(Strip.ramp.y - Game.enemy.y);
 
     this.center = center;
 

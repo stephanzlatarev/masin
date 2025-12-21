@@ -1,5 +1,5 @@
 import Command from "./command.js";
-import Route from "./route.js";
+import Strip from "./strip.js";
 import Units from "./units.js";
 
 class Defense {
@@ -17,7 +17,7 @@ class Defense {
       this.isDefending = true;
     } else if (this.isDefending) {
       for (const worker of this.workers) {
-        Command.harvest(worker, Route.home);
+        Command.harvest(worker, Strip.home);
       }
 
       this.isDefending = false;

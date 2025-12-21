@@ -1,7 +1,7 @@
 import Game from "./game.js";
 import Fist from "./fist.js";
 import Lane from "./lane.js";
-import Route from "./route.js";
+import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 
@@ -15,7 +15,7 @@ class Trace {
     shapes.length = 0;
 
     showZone();
-    showRoute();
+    showStrip();
     showFist();
     showClench();
 
@@ -28,14 +28,6 @@ class Trace {
 }
 
 function showZone() {
-  let section;
-
-  if (Route.complete) {
-    section = Route.sections[Route.sections.length - 1];
-  } else {
-    section = Route.projected[0];
-  }
-
   shapes.push({
     shape: "polygon",
     points: [
@@ -114,36 +106,15 @@ function showZone() {
   }
 }
 
-function showRoute() {
-  text.push("ROUTE -------------");
-
-  for (const section of Route.sections) {
+function showStrip() {
+  if (Strip.length) {
     shapes.push({
       shape: "line",
       width: 0.75,
-      x1: section.a.x, y1: section.a.y,
-      x2: section.b.x, y2: section.b.y,
-      color: section.straight ? "gold" : "purple",
-      opacity: section.straight ? 1 : 0.3,
-    });
-    text.push(
-      (section.straight ? "=== " : "~~~ ") +
-      threeletter("", Math.floor(section.a.x)) + ":" + threeletter("", Math.floor(section.a.y)) +
-      " - " +
-      section.length.toFixed(2)
-    );
-  }
-
-  text.push("");
-
-  for (const section of Route.projected) {
-    shapes.push({
-      shape: "line",
-      width: 0.75,
-      x1: section.a.x, y1: section.a.y,
-      x2: section.b.x, y2: section.b.y,
-      color: "purple",
-      opacity: 0.3,
+      x1: Strip.mineral.pos.x, y1: Strip.mineral.pos.y,
+      x2: Strip.ramp.x, y2: Strip.ramp.y,
+      color: "gold",
+      opacity: 1,
     });
   }
 }
@@ -187,12 +158,12 @@ function showFist() {
   }
   text.push("");
 
-  if (Route.section) {
+  if (Strip.length) {
     shapes.push({
       shape: "line",
       width: 0.5,
-      x1: Route.section.a.x, y1: Route.section.a.y,
-      x2: Route.section.b.x, y2: Route.section.b.y,
+      x1: Strip.mineral.pos.x, y1: Strip.mineral.pos.y,
+      x2: Strip.ramp.x, y2: Strip.ramp.y,
       color: getFistColor(),
       opacity: 1,
     });

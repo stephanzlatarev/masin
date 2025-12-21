@@ -1,6 +1,6 @@
 import Command from "./command.js";
 import Fist from "./fist.js";
-import Route from "./route.js";
+import Strip from "./strip.js";
 import Units from "./units.js";
 import project from "./projection.js";
 
@@ -18,7 +18,7 @@ class Clench {
     let tail;
 
     for (const worker of Fist.workers) {
-      worker.projection = project(Route.section, worker.pos);
+      worker.projection = Strip.projection(worker);
 
       if (head) {
         head = Math.max(worker.projection.s, head);
@@ -39,7 +39,7 @@ class Clench {
       const projection = worker.projection;
 
       if (projection.s <= 0) continue;
-      if (projection.s >= Route.section.length) continue;
+      if (projection.s >= Strip.length) continue;
       if (projection.h <= MIN_ALIGN) continue;
       if (projection.h >= MAX_DISTANCE) continue;
       if (isPathBlocked(worker, projection)) continue;
@@ -72,29 +72,29 @@ class Clench {
 
     // Select the direction for each worker to align with the rest
     // TODO: Prepare the section such that the workers cannot reach the minerals
-    const back = Math.min(tail + SPEED, right + SPEED, Route.section.length - RANKS_MARGIN);
+    const back = Math.min(tail + SPEED, right + SPEED, Strip.length - RANKS_MARGIN);
     for (const worker of Fist.workers) {
       const projection = worker.projection;
 
       if (projection.h >= MAX_DISTANCE) {
         // The worker is far away from the section and may get stuck clenching
-        worker.direction = Route.source;
-        worker.directionPos = Route.section.a;
+        worker.direction = Strip.home;
+        worker.directionPos = Strip.ramp;
       } else if (projection.s <= 0) {
         // The worker is before the section
-        worker.direction = Route.destination;
-        worker.directionPos = Route.section.b;
-      } else if (projection.s >= Route.section.length) {
+        worker.direction = Strip.mineral;
+        worker.directionPos = Strip.mineral.pos;
+      } else if (projection.s >= Strip.length) {
         // The worker is after the section
-        worker.direction = Route.source;
-        worker.directionPos = Route.section.a;
+        worker.direction = Strip.home;
+        worker.directionPos = Strip.ramp;
       } else if (worker.projection.s <= back) {
         // The worker is at the back of the fist
-        worker.direction = Route.destination;
-        worker.directionPos = Route.section.b;
+        worker.direction = Strip.mineral;
+        worker.directionPos = Strip.mineral.pos;
       } else {
-        worker.direction = Route.source;
-        worker.directionPos = Route.section.a;
+        worker.direction = Strip.home;
+        worker.directionPos = Strip.ramp;
       }
     }
 
@@ -126,7 +126,7 @@ function isPathBlocked(worker, b) {
   const line = { a: b, b: worker.pos, length: calculateDistance(worker.pos, b) };
 
   for (const one of Units.enemies.values()) {
-    const projection = project(line, one.pos);
+    const projection = project(line.a, line.b, line.length, one.pos);
     const margin = one.radius + worker.radius + SPEED;
 
     if (projection.s < -margin) continue;

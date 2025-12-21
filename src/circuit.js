@@ -2,7 +2,7 @@ import Command from "./command.js";
 import Fist from "./fist.js";
 import Game from "./game.js";
 import Lane from "./lane.js";
-import Route from "./route.js";
+import Strip from "./strip.js";
 import Zone from "./zone.js";
 
 class Circuit {
@@ -24,7 +24,7 @@ class Circuit {
     this.turns.push(new Turn(back.last, isDeepInZone));
 
     // Then turn towards the exit until the edge of the back zone
-    this.turns.push(new Turn(Route.home, isToeInZone));
+    this.turns.push(new Turn(Strip.home, isToeInZone));
 
     // Then turn around and go towards the front zone by the enemy depot building until past it  
     this.turns.push(new Turn(front.last, () => !Zone.back.includes(Fist)));
@@ -33,7 +33,7 @@ class Circuit {
     this.turns.push(new Turn(front.first, isDeepInZone));
 
     // Then turn towards the exit until the edge of the front zone
-    this.turns.push(new Turn(Route.home, isToeInZone));
+    this.turns.push(new Turn(Strip.home, isToeInZone));
   }
 
   move() {
@@ -50,7 +50,7 @@ class Circuit {
     }
 
     const mineral = getMineral(turn.mineral);
-    const direction = (mineral === Route.home) ? Route.section.a : mineral.pos;
+    const direction = (mineral === Strip.home) ? Strip.ramp : mineral.pos;
 
     Command.head(Fist.workers, mineral, direction);
   }
