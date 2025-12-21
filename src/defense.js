@@ -30,7 +30,7 @@ function getEnemyWorker(workers) {
   let worker;
 
   for (const enemy of Units.enemies.values()) {
-    if (enemy.radius > 0.5) continue;
+    if (!enemy.isWorker) continue;
     if (!isClose(enemy, workers)) continue;
 
     if (worker) {

@@ -29,10 +29,7 @@ export default class Lane {
   static start() {
     const minerals = [];
 
-    for (const one of Game.units) {
-      if (one.owner !== 16) continue;
-      if (one.radius < 1) continue;
-      if (one.radius >= 1.2) continue;
+    for (const one of Units.minerals.values()) {
       if (Math.abs(Game.enemy.x - one.pos.x) > 10) continue;
       if (Math.abs(Game.enemy.y - one.pos.y) > 10) continue;
   
@@ -74,7 +71,7 @@ class EnemyHarvestLane extends Lane {
     const fist = project(this, Fist);
 
     for (const unit of Units.enemies.values()) {
-      if (unit.radius > 0.5) continue;
+      if (!unit.isWorker) continue;
       if (!this.includes(unit.pos)) continue;
 
       const target = project(this, unit.pos);

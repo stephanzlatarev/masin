@@ -25,9 +25,14 @@ function areThreatsNearby() {
     if (Math.abs(Units.base.pos.x - enemy.pos.x) > 12) continue;
     if (Math.abs(Units.base.pos.y - enemy.pos.y) > 12) continue;
 
-    if (worker || (enemy.radius > 0.5)) {
+    if (worker) {
+      // This is a second enemy unit. It's a threat.
+      return true;
+    } else if (!enemy.isWorker) {
+      // This is not a worker. It's definitely a threat.
       return true;
     } else {
+      // This is the first enemy worker. If it's alone then it's not a threat.
       worker = enemy;
     }
   }

@@ -24,6 +24,7 @@ console.log = function() {
 export default async function() {
   await Game.connect();
 
+  Units.sync();
   Lane.start();
   Route.start();
   Hire.start();

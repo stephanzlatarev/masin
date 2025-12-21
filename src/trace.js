@@ -87,7 +87,7 @@ function showZone() {
     });
 
     for (const unit of Units.enemies.values()) {
-      if (unit.radius > 0.5) continue;
+      if (!unit.isWorker) continue;
       if (!lane.includes(unit.pos)) continue;
 
       const color = (unit === target) ? "black" : "green";

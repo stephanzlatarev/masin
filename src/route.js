@@ -111,10 +111,7 @@ function syncMineral(mineral) {
 }
 
 function findEnemyMineral() {
-  for (const one of Game.units) {
-    if (one.owner !== 16) continue;
-    if (one.radius < 1) continue;
-    if (one.radius >= 1.2) continue;
+  for (const one of Units.minerals.values()) {
     if (Math.abs(Game.enemy.x - one.pos.x) > 10) continue;
     if (Math.abs(Game.enemy.y - one.pos.y) > 10) continue;
 
@@ -141,9 +138,7 @@ function findSourceMineral(pos) {
 function findDestinationMineral(source) {
   const { x, y } = getSymmetricalPos(source.pos);
 
-  for (const one of Game.units) {
-    if (one.owner !== 16) continue;
-    if (one.radius >= 1.2) continue;
+  for (const one of Units.minerals.values()) {
     if (one.pos.x !== x) continue;
     if (one.pos.y !== y) continue;
 

@@ -24,7 +24,7 @@ class Delay {
   syncUnit(unit) {
     if (this.mode) {
       // Handle the real or simulated delay
-      if (unit.radius > 0.5) return; // Just for workers
+      if (!unit.isWorker) return;
       if ((unit.owner !== 1) && (unit.owner !== 2)) return;
 
       if (unit.owner === 1) {

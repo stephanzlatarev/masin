@@ -5,9 +5,7 @@ class Strike {
 
   getTarget() {
     for (const enemy of Units.enemies.values()) {
-      if (enemy.radius > 0.5) continue; // Just enemy workers
-
-      if (canStrike(Fist.workers, enemy)) {
+      if (enemy.isWorker && canStrike(Fist.workers, enemy)) {
         return enemy;
       }
     }

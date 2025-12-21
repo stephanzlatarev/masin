@@ -202,7 +202,7 @@ class Fist {
 
 function isEnemyInSight() {
   for (const enemy of Units.enemies.values()) {
-    if (enemy.radius < 0.5) return true;
+    if (enemy.isWorker) return true;
   }
 }
 
@@ -210,7 +210,7 @@ function getNearEnemyCount(fist) {
   let count = 0;
 
   for (const enemy of Units.enemies.values()) {
-    if (enemy.radius > 0.5) continue; // Just enemy workers
+    if (!enemy.isWorker) continue;
 
     const b = enemy.pos;
 

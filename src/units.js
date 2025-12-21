@@ -1,20 +1,31 @@
 import Delay from "./delay.js";
 import Game from "./game.js";
 
+const IS_WORKER = { 45: true, 84: true, 104: true };
+const IS_DEPOT = { 18: true, 59: true, 86: true };
+
 class Units {
 
   base = null;
   units = new Map();
   workers = new Map();
   enemies = new Map();
+  minerals = new Map();
 
   async sync() {
     const units = new Map();
     const workers = new Map();
     const enemies = new Map();
+    const minerals = new Map();
 
     for (const unit of Game.units) {
       unit.realpos = { x: unit.pos.x, y: unit.pos.y };
+
+      if (IS_WORKER[unit.unitType]) {
+        unit.isWorker = true;
+      } else if ((unit.owner === 16) && (unit.radius > 1) && (unit.radius < 1.2)) {
+        unit.isMineral = true;
+      }
 
       const previous = this.units.get(unit.tag);
 
@@ -26,23 +37,25 @@ class Units {
       Delay.syncUnit(unit);
 
       if (unit.owner === 1) {
-        if (unit.radius < 0.5) {
+        if (unit.isWorker) {
           workers.set(unit.tag, unit);
-        } else if (unit.radius >= 2.5) {
+        } else if (IS_DEPOT[unit.unitType]) {
           this.base = unit;
         }
+
+        units.set(unit.tag, unit);
       } else if (unit.owner === 2) {
         enemies.set(unit.tag, unit);
-      } else {
-        continue;
+        units.set(unit.tag, unit);
+      } else if (unit.isMineral) {
+        minerals.set(unit.tag, unit);
       }
-
-      units.set(unit.tag, unit);
     }
 
     this.units = units;
     this.workers = workers;
     this.enemies = enemies;
+    this.minerals = minerals;
   }
 
   get(tag) {
