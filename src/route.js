@@ -48,7 +48,7 @@ class Route {
       // The scout reached the enemy base. Complete the route.
       const current = this.sections[this.sections.length - 1];
       const lastpos = current.next || current.b;
-      const section = new Section(lastpos, scout.facing);
+      const section = new Section(lastpos);
 
       section.extend(this.destination.pos, calculateDistance(lastpos, this.destination.pos));
 
@@ -73,10 +73,9 @@ class Section {
 
   straight = true;
 
-  constructor(a, direction = 0) {
+  constructor(a) {
     this.a = a;
     this.b = a;
-    this.direction = direction;
     this.length = 0;
   }
 
@@ -176,8 +175,8 @@ function findFirstSection(sections, projected) {
       const destination = findDestinationMineral(source);
       const enemyRamp = getSymmetricalPos(worker.realpos);
 
-      sections.push(new Section(source.pos, worker.lastfacing).extend(worker.realpos));
-      sections.push(new Section(worker.realpos, worker.facing));
+      sections.push(new Section(source.pos).extend(worker.realpos));
+      sections.push(new Section(worker.realpos));
 
       const length = calculateDistance(enemyRamp, destination.pos);
       projected.push(new Section(enemyRamp).extend(destination.pos, length));
@@ -203,11 +202,11 @@ function findNextSection(sections) {
   } else if (current.straight) {
     // Update a section bud
     current.extend(scout.lastrealpos, length);
-    sections.push(new Section(scout.realpos, scout.facing));
+    sections.push(new Section(scout.realpos));
   } else {
     // Add a section after a bend
-    sections.push(new Section(current.next, scout.lastfacing).extend(scout.lastrealpos, length));
-    sections.push(new Section(scout.realpos, scout.facing));
+    sections.push(new Section(current.next).extend(scout.lastrealpos, length));
+    sections.push(new Section(scout.realpos));
   }
 }
 

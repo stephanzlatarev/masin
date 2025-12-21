@@ -130,9 +130,7 @@ function showRoute() {
       (section.straight ? "=== " : "~~~ ") +
       threeletter("", Math.floor(section.a.x)) + ":" + threeletter("", Math.floor(section.a.y)) +
       " - " +
-      section.length.toFixed(2) +
-      " - " +
-      section.direction
+      section.length.toFixed(2)
     );
   }
 
