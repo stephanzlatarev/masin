@@ -51,7 +51,7 @@ class Fist {
   }
 
   clench() {
-    Clench.run();
+    Clench.soft();
 
     if (Clench.done()) {
       Circuit.reset();
@@ -73,7 +73,7 @@ class Fist {
     this.victim = Strike.getTarget();
 
     if (this.victim) {
-      Command.strike(this.workers, this.victim, Strip.mineral, Strip.mineral.pos);
+      Strike.hit(this.victim);
 
       return this.transition("strike");
     }
@@ -110,23 +110,12 @@ class Fist {
   }
 
   cooldown() {
-    let rallying = 0;
-
-    for (const worker of this.workers) {
-      if (Zone.center.includes(worker.pos)) continue;
-      if (Zone.back.includes(worker.pos)) continue;
-
-      if (worker.order.abilityId === 295) {
-        rallying++;
-      }
-    }
-
-    if (rallying === this.workers.length) {
-      if (Repair.isNeeded()) {
-        this.transition("repair");
-      } else {
-        this.transition("clench");
-      }
+    if (Strike.rally()) {
+      // The workers are still rallying
+    } else if (Repair.isNeeded()) {
+      this.transition("repair");
+    } else {
+      this.transition("clench");
     }
   }
 

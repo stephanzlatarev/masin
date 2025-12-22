@@ -90,15 +90,23 @@ function getDelayedOrder(delay, unit) {
 }
 
 function getDelayedPosition(delay, unit) {
-  // Extrapolate the position of the unit two steps ahead
   const list = delay.orders.get(unit.tag);
-  if (!list) return unit.realpos;
 
-  const step = calculateDistance(unit.realpos, unit.lastrealpos);
   let pos = { x: unit.realpos.x, y: unit.realpos.y };
 
-  stepPosition(pos, step, list.after0);
-  stepPosition(pos, step, list.after1);
+  if (list) {
+    // Extrapolate the position of the unit two steps ahead
+    const step = calculateDistance(unit.realpos, unit.lastrealpos);
+
+    stepPosition(pos, step, list.after0);
+    stepPosition(pos, step, list.after1);
+  } else {
+    const stepx = (unit.realpos.x - unit.lastrealpos.x);
+    const stepy = (unit.realpos.y - unit.lastrealpos.y);
+
+    pos.x += stepx + stepx;
+    pos.y += stepy + stepy;
+  }
 
   return pos;
 }

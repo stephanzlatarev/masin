@@ -6,10 +6,12 @@ export default function(a, b, length, p) {
   const py = p.y - a.y;
   const dp = (bx * px + by * py);
   const s = dp / length;
-  const h = Math.abs((by * px - bx * py) / length);
+
+  const w = by * px - bx * py;
+  const h = Math.abs(w / length);
 
   const x = a.x + s * bx / length;
   const y = a.y + s * by / length;
 
-  return { x, y, s, h };
+  return { x, y, s, h, a: Math.sign(w) };
 }

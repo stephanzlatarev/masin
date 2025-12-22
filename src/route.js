@@ -36,8 +36,7 @@ class Route {
 
     if (scout && (calculateDistance(scout.realpos, Game.enemy) < end)) {
       // The scout reached the enemy base. Complete the strip.
-      Strip.ramp = scout.realpos;
-      Strip.length = calculateDistance(Strip.ramp, Strip.mineral.pos);
+      Strip.init(scout.realpos);
 
       Zone.init();
       Lane.order();

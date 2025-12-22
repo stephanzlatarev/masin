@@ -120,20 +120,37 @@ function showStrip() {
 }
 
 function showFist() {
-  if (!Fist.workers) return;
+  if (!Fist.workers || !Fist.workers[0]) return;
 
-  const anchor = Fist.workers[0];
-  if (!anchor) return;
+  const workers = [...Fist.workers];
+  const clenching = (Fist.mode === "clench");
+
+  if (clenching) {
+    workers.sort((a, b) => (a.projection?.s - b.projection?.s));
+  }
 
   const mode = ("          " + Fist.mode).slice(-7);
-  text.push("FIST       " + mode + " | HP | Margin");
-  for (const worker of Fist.workers) {
+  text.push("FIST       " + mode + " | HP" + (clenching ? " |  s   |  h   | side" : ""));
+
+  for (const worker of workers) {
     const line = [
       worker.tag,
       threeletter("", Math.floor(worker.pos.x)) + ":" + threeletter("", Math.floor(worker.pos.y)),
       "|", Math.floor(worker.health),
-      "|", Math.abs(calculateDistance(worker.pos, anchor.pos)).toFixed(2),
     ];
+
+    if (worker.projection) {
+      line.push("|", (worker.projection.s - workers[0].projection.s).toFixed(2));
+      line.push("|", worker.projection.h.toFixed(2));
+
+      if (Strip.isWorkerNearStrip(worker)) {
+        if (worker.projection.a === Strip.side) {
+          line.push("|", "in");
+        } else {
+          line.push("|", "out");
+        }
+      }
+    }
 
     text.push(line.join(" "));
 

@@ -1,4 +1,12 @@
+import Command from "./command.js";
+import Game from "./game.js";
 import project from "./projection.js";
+
+// Minimum projection h for a worker to be considered on the strip
+const MIN_H = 0.1;
+
+// Maximum projection h for a worker to be considered near the strip
+const MAX_H = 4;
 
 class Strip {
 
@@ -14,10 +22,67 @@ class Strip {
   // The distance between the ramp point and the mineral at enemy base
   length;
 
-  projection(unit) {
-    return project(this.ramp, this.mineral.pos, this.length, unit.pos);
+  // The side of the enemy base depot building
+  side;
+
+  init(ramp) {
+    this.ramp = ramp;
+    this.length = calculateDistance(ramp, this.mineral.pos);
+    this.side = this.projection(Game.enemy).a;
+
+    if (Math.abs(ramp.x - Game.enemy.x) > Math.abs(ramp.y - Game.enemy.y)) {
+      this.slide = this.slideHorizontally.bind(this);
+    } else {
+      this.slide = this.slideVertically.bind(this);
+    }
   }
 
+  isWorkerOnStrip(worker) {
+    const projection = worker.projection || this.projection(worker);
+
+    return (projection.h <= MIN_H);
+  }
+
+  isWorkerAwayFromStrip(worker) {
+    const projection = worker.projection || this.projection(worker);
+
+    return (projection.h >= MAX_H);
+  }
+
+  isWorkerNearStrip(worker) {
+    return !this.isWorkerOnStrip(worker) && !this.isWorkerAwayFromStrip(worker);
+  }
+
+  moveForth(worker) {
+    Command.harvest(worker, this.mineral, this.mineral.pos);
+  }
+
+  moveBack(worker) {
+    Command.harvest(worker, this.home, this.ramp);
+  }
+
+  slideHorizontally(worker) {
+    const ratio = (worker.pos.y - this.ramp.y) / (this.mineral.pos.y - this.ramp.y);
+    const pos = { x: this.ramp.x + (this.mineral.pos.x - this.ramp.x) * ratio, y: worker.pos.y };
+
+    Command.align(worker, pos, this.home, pos);
+  }
+
+  slideVertically(worker) {
+    const ratio = (worker.pos.x - this.ramp.x) / (this.mineral.pos.x - this.ramp.x);
+    const pos = { x: worker.pos.x, y: this.ramp.y + (this.mineral.pos.y - this.ramp.y) * ratio };
+
+    Command.align(worker, pos, this.home, pos);
+  }
+
+  projection(point) {
+    return project(this.ramp, this.mineral.pos, this.length, point.pos || point);
+  }
+
+}
+
+function calculateDistance(a, b) {
+  return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
 export default new Strip();

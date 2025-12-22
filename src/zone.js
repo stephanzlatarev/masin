@@ -49,7 +49,9 @@ class Zone {
     this.depot = new Box(Game.enemy.x - 2.5, Game.enemy.y - 2.5, Game.enemy.x + 2.5, Game.enemy.y + 2.5);
   }
 
-  includes(pos) {
+  includes(point) {
+    const pos = point.pos || point;
+
     return this.front.includes(pos) || this.center.includes(pos) || this.back.includes(pos) || this.depot.includes(pos);
   }
 }
@@ -63,7 +65,9 @@ class Box {
     this.bottom = bottom;
   }
 
-  includes(pos) {
+  includes(point) {
+    const pos = point.pos || point;
+
     return (pos.x >= this.left) && (pos.x <= this.right) && (pos.y >= this.top) && (pos.y <= this.bottom);
   }
 
