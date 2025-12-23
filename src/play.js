@@ -32,18 +32,18 @@ export default async function() {
   while (true) {
     Units.sync();
 
-    if (Fist.workers.length < 9) {
-      // We lost our fist
-      await Game.end();
-      break;
-    }
-
     Lane.sync();
     Route.sync();
     Hire.sync();
     Fist.sync();
     Defense.sync();
     Liftoff.sync();
+
+    if (!Fist.workers.length) {
+      // We lost our fist
+      await Game.end();
+      break;
+    }
 
     await Game.run();
   }

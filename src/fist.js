@@ -29,6 +29,9 @@ class Fist {
     }
 
     this.workers = [...workers];
+
+    if (!this.workers.length) return;
+
     this.pos = this.workers[0].pos;
     this.x = this.pos.x;
     this.y = this.pos.y;
