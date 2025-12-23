@@ -28,39 +28,23 @@ class Trace {
 }
 
 function showZone() {
-  shapes.push({
-    shape: "polygon",
-    points: [
-      Zone.front.left, Zone.front.top,
-      Zone.front.right, Zone.front.top,
-      Zone.front.right, Zone.front.bottom,
-      Zone.front.left, Zone.front.bottom,
-    ],
-    color: "#00DD00",
-    filled: true,
-  });
-  shapes.push({
-    shape: "polygon",
-    points: [
-      Zone.center.left, Zone.center.top,
-      Zone.center.right, Zone.center.top,
-      Zone.center.right, Zone.center.bottom,
-      Zone.center.left, Zone.center.bottom,
-    ],
-    color: "#00DDDD",
-    filled: true,
-  });
-  shapes.push({
-    shape: "polygon",
-    points: [
-      Zone.back.left, Zone.back.top,
-      Zone.back.right, Zone.back.top,
-      Zone.back.right, Zone.back.bottom,
-      Zone.back.left, Zone.back.bottom,
-    ],
-    color: "#0000DD",
-    filled: true,
-  });
+  const showBox = function(box, color) {
+    shapes.push({
+      shape: "polygon",
+      points: [
+        box.left - 0.1, box.top - 0.1,
+        box.right + 0.1, box.top - 0.1,
+        box.right + 0.1, box.bottom + 0.1,
+        box.left - 0.1, box.bottom + 0.1,
+      ],
+      filled: true,
+      color,
+    });
+  }
+
+  showBox(Zone.front.main, "#00DD00");
+  showBox(Zone.center.main, "#00DDDD");
+  showBox(Zone.back.main, "#0000DD");
 
   let shade = 255;
   for (const lane of Lane.enemyHarvestLanes) {
@@ -231,10 +215,6 @@ function threeletter(tab, text) {
   }
 
   return tab + " X ";
-}
-
-function calculateDistance(a, b) {
-  return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
 export default new Trace();

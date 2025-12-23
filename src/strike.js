@@ -15,14 +15,20 @@ class Strike {
   }
 
   hit(enemy) {
-    Command.strike(Fist.workers, enemy, Strip.mineral, Strip.mineral.pos);
+    for (const worker of Fist.workers) {
+      if (isTooClose(worker, Strip.mineral)) {
+        Command.strike(Fist.workers, enemy, Strip.home, Strip.ramp);
+      } else {
+        Command.strike(Fist.workers, enemy, Strip.mineral, Strip.mineral.pos);
+      }
+    }
   }
 
   rally() {
     let isRallying = false;
 
     for (const worker of Fist.workers) {
-      const target = shouldRallyForward(worker) ? Strip.mineral : Strip.home;
+      const target = (Zone.center.includes(worker) || Zone.back.includes(worker)) ? Strip.mineral : Strip.home;
 
       if ((worker.order.abilityId === 295) && (worker.order.targetUnitTag === target.tag)) {
         // Worker is moving in the right direction. Wait until it leaves the back zones.
@@ -48,18 +54,9 @@ function canStrike(workers, enemy) {
   return true;
 }
 
-function shouldRallyForward(worker) {
-  if (Zone.back.includes(worker)) return true;
-  if (Zone.center.includes(worker) && (getCenterSide(worker.pos) !== getCenterSide(Strip.mineral.pos))) return true;
-}
-
-function getCenterSide(pos) {
-  const zx = Zone.center.right - Zone.center.left;
-  const zy = Zone.center.bottom - Zone.center.top;
-  const px = pos.x - Zone.center.left;
-  const py = pos.y - Zone.center.top;
-
-  return Math.sign(zy * px - zx * py);
+function isTooClose(worker, mineral) {
+  if (Math.abs(worker.pos.x - mineral.pos.x) <= 3) return true;
+  if (Math.abs(worker.pos.y - mineral.pos.y) <= 3) return true;
 }
 
 function calculateDistance(a, b) {

@@ -1,5 +1,7 @@
 import Command from "./command.js";
 import Game from "./game.js";
+import Units from "./units.js";
+import Zone from "./zone.js";
 import project from "./projection.js";
 
 // Minimum projection h for a worker to be considered on the strip
@@ -62,23 +64,77 @@ class Strip {
   }
 
   slideHorizontally(worker) {
-    const ratio = (worker.pos.y - this.ramp.y) / (this.mineral.pos.y - this.ramp.y);
-    const pos = { x: this.ramp.x + (this.mineral.pos.x - this.ramp.x) * ratio, y: worker.pos.y };
+    let left = Math.min(worker.pos.x, worker.realpos.x);
+    let right = Math.max(worker.pos.x, worker.realpos.x);
+    let top = Math.min(worker.pos.y, worker.realpos.y);
+    let bottom = Math.max(worker.pos.y, worker.realpos.y);
 
-    Command.align(worker, pos, this.home, pos);
+    if (this.ramp.x < right) left -= 2.0;
+    if (this.ramp.x > left) right += 2.0;
+
+    top -= 1.0;
+    bottom += 1.0;
+
+    if (!isPathBlocked(left, top, right, bottom)) {
+      const ratio = (worker.pos.y - this.ramp.y) / (this.mineral.pos.y - this.ramp.y);
+      const pos = { x: this.ramp.x + (this.mineral.pos.x - this.ramp.x) * ratio, y: worker.pos.y };
+
+      Command.align(worker, pos, this.home, pos);
+    } else if (isTooClose(worker, this.mineral)) {
+      Command.harvest(worker, this.home, this.ramp);
+    } else if (Zone.front.includes(worker) || Zone.center.includes(worker)) {
+      Command.harvest(worker, this.mineral, this.mineral.pos);
+    } else {
+      Command.harvest(worker, this.home, this.ramp);
+    }
   }
 
   slideVertically(worker) {
-    const ratio = (worker.pos.x - this.ramp.x) / (this.mineral.pos.x - this.ramp.x);
-    const pos = { x: worker.pos.x, y: this.ramp.y + (this.mineral.pos.y - this.ramp.y) * ratio };
+    let left = Math.min(worker.pos.x, worker.realpos.x);
+    let right = Math.max(worker.pos.x, worker.realpos.x);
+    let top = Math.min(worker.pos.y, worker.realpos.y);
+    let bottom = Math.max(worker.pos.y, worker.realpos.y);
 
-    Command.align(worker, pos, this.home, pos);
+    left -= 1.0;
+    right += 1.0;
+
+    if (this.ramp.y < bottom) top -= 2.0;
+    if (this.ramp.y > top) bottom += 2.0;
+
+    if (!isPathBlocked(left, top, right, bottom)) {
+      const ratio = (worker.pos.x - this.ramp.x) / (this.mineral.pos.x - this.ramp.x);
+      const pos = { x: worker.pos.x, y: this.ramp.y + (this.mineral.pos.y - this.ramp.y) * ratio };
+
+      Command.align(worker, pos, this.home, pos);
+    } else if (isTooClose(worker, this.mineral)) {
+      Command.harvest(worker, this.home, this.ramp);
+    } else if (Zone.front.includes(worker) || Zone.center.includes(worker)) {
+      Command.harvest(worker, this.mineral, this.mineral.pos);
+    } else {
+      Command.harvest(worker, this.home, this.ramp);
+    }
   }
 
   projection(point) {
     return project(this.ramp, this.mineral.pos, this.length, point.pos || point);
   }
 
+}
+
+function isPathBlocked(left, top, right, bottom) {
+  for (const one of Units.enemies.values()) {
+    if (one.pos.x < left) continue;
+    if (one.pos.x > right) continue;
+    if (one.pos.y < top) continue;
+    if (one.pos.y > bottom) continue;
+
+    return true;
+  }
+}
+
+function isTooClose(worker, mineral) {
+  if (Math.abs(worker.pos.x - mineral.pos.x) <= 3) return true;
+  if (Math.abs(worker.pos.y - mineral.pos.y) <= 3) return true;
 }
 
 function calculateDistance(a, b) {

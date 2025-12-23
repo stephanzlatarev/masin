@@ -5,48 +5,73 @@ import Strip from "./strip.js";
 class Zone {
 
   depot = new Box();
-  front = new Box();
-  center = new Box();
-  back = new Box();
+  front = new Area();
+  center = new Area();
+  back = new Area();
 
   init() {
-    const center = getCenter();
-    const horizontal = new Box(center.left, center.top, center.right, center.bottom);
-    const vertical = new Box(center.left, center.top, center.right, center.bottom);
-    const adx = Math.abs(Strip.ramp.x - Game.enemy.x);
-    const ady = Math.abs(Strip.ramp.y - Game.enemy.y);
+    const depot = new Box(Game.enemy.x - 2.5, Game.enemy.y - 2.5, Game.enemy.x + 2.5, Game.enemy.y + 2.5);
+    const mainCenter = getCenter();
+    const addonCenter = mainCenter.clone();
+    const mainHorizontal = mainCenter.clone();
+    const addonHorizontal = new Box(Game.enemy.x - 1.5, 0, Game.enemy.x + 1.5, 0);
+    const mainVertical = mainCenter.clone();
+    const addonVertical = new Box(0, Game.enemy.y - 1.5, 0, Game.enemy.y + 1.5);
 
-    this.center = center;
-
-    if (this.center.left < Game.enemy.x) {
+    if (mainCenter.left < Game.enemy.x) {
       // Center zone is on the left side
-      horizontal.left = center.right;
-      horizontal.right = Game.enemy.x + 10;
+      mainHorizontal.left = mainCenter.right;
+      mainHorizontal.right = Game.enemy.x + 10;
+
+      addonCenter.left = mainCenter.right;
+      addonCenter.right = mainCenter.right + 1;
+
+      addonVertical.left = mainCenter.right;
+      addonVertical.right = mainCenter.right + 1;
     } else {
       // Center zone is on the right side
-      horizontal.left = Game.enemy.x - 10;
-      horizontal.right = center.left;
+      mainHorizontal.left = Game.enemy.x - 10;
+      mainHorizontal.right = mainCenter.left;
+
+      addonCenter.left = mainCenter.left - 1;
+      addonCenter.right = mainCenter.left;
+
+      addonVertical.left = mainCenter.left - 1;
+      addonVertical.right = mainCenter.left;
     }
 
-    if (this.center.top < Game.enemy.y) {
+    if (mainCenter.top < Game.enemy.y) {
       // Center zone is on the top side
-      vertical.top = center.bottom;
-      vertical.bottom = Game.enemy.y + 10;
+      mainVertical.top = mainCenter.bottom;
+      mainVertical.bottom = Game.enemy.y + 10;
+
+      addonCenter.top = mainCenter.bottom;
+      addonCenter.bottom = mainCenter.bottom + 1;
+
+      addonHorizontal.top = mainCenter.bottom;
+      addonHorizontal.bottom = mainCenter.bottom + 1;
     } else {
       // Center zone is on the bottom side
-      vertical.top = Game.enemy.y - 10;
-      vertical.bottom = center.top;
+      mainVertical.top = Game.enemy.y - 10;
+      mainVertical.bottom = mainCenter.top;
+
+      addonCenter.top = mainCenter.top - 1;
+      addonCenter.bottom = mainCenter.top;
+
+      addonHorizontal.top = mainCenter.top - 1;
+      addonHorizontal.bottom = mainCenter.top;
     }
 
-    if (adx > ady) {
-      this.front = horizontal;
-      this.back = vertical;
+    this.depot = depot;
+    this.center = new Area(mainCenter, addonCenter);
+
+    if (Math.abs(Strip.ramp.x - Game.enemy.x) > Math.abs(Strip.ramp.y - Game.enemy.y)) {
+      this.front = new Area(mainHorizontal, addonHorizontal);
+      this.back = new Area(mainVertical, addonVertical);
     } else {
-      this.front = vertical;
-      this.back = horizontal;
+      this.front = new Area(mainVertical, addonVertical);
+      this.back = new Area(mainHorizontal, addonHorizontal);
     }
-
-    this.depot = new Box(Game.enemy.x - 2.5, Game.enemy.y - 2.5, Game.enemy.x + 2.5, Game.enemy.y + 2.5);
   }
 
   includes(point) {
@@ -56,6 +81,33 @@ class Zone {
   }
 }
 
+class Area {
+
+  constructor(main, addon) {
+    this.main = main ? main.clone() : new Box();
+    this.addon = addon ? addon.clone() : new Box();
+  }
+
+  includes(point) {
+    const pos = point.pos || point;
+
+    return (this.main.includes(pos) || this.addon.includes(pos));
+  }
+
+  getSide(point) {
+    if (!this.main || !this.addon) return;
+
+    const pos = point.pos || point;
+    const zx = this.addon.x - this.main.x;
+    const zy = this.addon.y - this.main.y;
+    const px = pos.x - this.main.x;
+    const py = pos.y - this.main.y;
+
+    return Math.sign(zy * px - zx * py);
+  }
+
+}
+
 class Box {
 
   constructor(left, top, right, bottom) {
@@ -63,12 +115,19 @@ class Box {
     this.top = top;
     this.right = right;
     this.bottom = bottom;
+
+    this.x = (left + right) / 2;
+    this.y = (top + bottom) / 2;
   }
 
   includes(point) {
     const pos = point.pos || point;
 
     return (pos.x >= this.left) && (pos.x <= this.right) && (pos.y >= this.top) && (pos.y <= this.bottom);
+  }
+
+  clone() {
+    return new Box(this.left, this.top, this.right, this.bottom);
   }
 
 }
