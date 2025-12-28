@@ -7,8 +7,12 @@ import Zone from "./zone.js";
 class Strike {
 
   getTarget() {
+    const damage = Fist.workers.length * 5;
+
     for (const enemy of Units.enemies.values()) {
-      if (enemy.isWorker && canStrike(Fist.workers, enemy)) {
+      if (!enemy.isWorker && (enemy.health > damage)) continue;
+
+      if (canStrike(Fist.workers, enemy)) {
         return enemy;
       }
     }
