@@ -100,6 +100,7 @@ class Fist {
     if (Zone.includes(this)) {
       Circuit.move();
     } else {
+      Circuit.reset();
       Command.head(this.workers, Strip.mineral, Strip.mineral.pos);
     }
   }
