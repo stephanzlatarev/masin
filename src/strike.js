@@ -44,6 +44,28 @@ class Strike {
     return isRallying;
   }
 
+  monitor(enemy) {
+    try {
+      console.log("[strike] target:", enemy.tag,
+        "at:", enemy.realpos.x.toFixed(2) + ":" + enemy.realpos.y.toFixed(2), ">", enemy.pos.x.toFixed(2) + ":" + enemy.pos.y.toFixed(2),
+        "face:", enemy.facing.toFixed(2),
+        "health:", enemy.health.toFixed(2),
+      );
+      for (const worker of Fist.workers) {
+        console.log("-", worker.tag,
+          "weapon:", worker.weaponCooldown.toFixed(2),
+          "distance:", calculateDistance(worker.pos, enemy.pos).toFixed(2),
+          "at:", worker.realpos.x.toFixed(2) + ":" + worker.realpos.y.toFixed(2), ">", worker.pos.x.toFixed(2) + ":" + worker.pos.y.toFixed(2),
+          "facing:", worker.facing.toFixed(2),
+          "health:", worker.health.toFixed(2),
+          "orders:", JSON.stringify(worker.orders),
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
 }
 
 function canStrike(workers, enemy) {

@@ -77,6 +77,7 @@ class Fist {
 
     if (this.victim) {
       Strike.hit(this.victim);
+      Strike.monitor(this.victim);
 
       return this.transition("strike");
     }
@@ -104,6 +105,8 @@ class Fist {
   }
 
   strike() {
+    if (this.victim) Strike.monitor(this.victim);
+
     if (!Units.get(this.victim.tag)) {
       // The victim got killed
       this.kills++;
