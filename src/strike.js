@@ -7,12 +7,8 @@ import Zone from "./zone.js";
 class Strike {
 
   getTarget() {
-    const damage = Fist.workers.length * 5;
-
     for (const enemy of Units.enemies.values()) {
-      if (!enemy.isWorker && (enemy.health > damage)) continue;
-
-      if (canStrike(Fist.workers, enemy)) {
+      if (isValidTarget(enemy) && canStrike(Fist.workers, enemy)) {
         return enemy;
       }
     }
@@ -70,6 +66,11 @@ class Strike {
     }
   }
 
+}
+
+function isValidTarget(enemy) {
+  if (enemy.isWorker) return true;
+  if (enemy.unitType === 105) return true; // Zergling
 }
 
 function canStrike(workers, enemy) {
