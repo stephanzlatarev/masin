@@ -36,15 +36,15 @@ class Units {
 
       Delay.syncUnit(unit);
 
-      if (unit.owner === 1) {
+      if (unit.owner === Game.playerId) {
         if (unit.isWorker) {
           workers.set(unit.tag, unit);
-        } else if (IS_DEPOT[unit.unitType]) {
+        } else if (IS_DEPOT[unit.unitType] || (unit.tag === this.base?.tag)) {
           this.base = unit;
         }
 
         units.set(unit.tag, unit);
-      } else if (unit.owner === 2) {
+      } else if (unit.owner === Game.enemy.playerId) {
         enemies.set(unit.tag, unit);
         units.set(unit.tag, unit);
       } else if (unit.isMineral) {

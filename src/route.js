@@ -19,6 +19,8 @@ class Route {
   }
 
   sync() {
+    if (!Units.base) return;
+
     Strip.mineral = syncMineral(Strip.mineral);
 
     if (Strip.length) return;

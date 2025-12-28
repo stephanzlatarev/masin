@@ -1,3 +1,4 @@
+import Game from "./game.js";
 
 class Delay {
 
@@ -27,7 +28,7 @@ class Delay {
       if (!unit.isWorker) return;
       if ((unit.owner !== 1) && (unit.owner !== 2)) return;
 
-      if (unit.owner === 1) {
+      if (unit.owner === Game.playerId) {
         unit.order = getDelayedOrder(this, unit);
       }
 

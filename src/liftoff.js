@@ -4,6 +4,8 @@ import Units from "./units.js";
 class Liftoff {
 
   sync() {
+    if (!Units.base) return;
+
     if (Units.base.isFlying) {
       if (!areThreatsNearby()) {
         Command.land(Units.base);

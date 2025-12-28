@@ -9,9 +9,10 @@ class Game {
   logCommands = false;
   showTrace = false;
 
+  playerId = 1;
   loop = 0;
   units = [];
-  enemy = { x: 0, y: 0 };
+  enemy = { playerId: 2, x: 0, y: 0 };
 
   async connect() {
     const ladder = parseArguments(process.argv);
@@ -63,6 +64,7 @@ class Game {
     }
 
     console.log("Playing...");
+    const observation = await this.client.observation();
     const gameInfo = await this.client.gameInfo();
     const playableArea = gameInfo.startRaw.playableArea;
 
@@ -72,7 +74,13 @@ class Game {
     this.bottom = playableArea.p1.y;
 
     this.enemy = gameInfo.startRaw.startLocations[0];
-    this.units = (await this.client.observation()).observation.rawData.units;
+    this.units = observation.observation.rawData.units;
+
+    this.playerId = this.units.find(unit => (unit.unitType === 18)).owner;
+    this.enemy.playerId = (3 - this.playerId);
+
+    console.log("Player:", this.playerId);
+    console.log("Enemy:", JSON.stringify(this.enemy));
   }
 
   async run() {
