@@ -1,4 +1,5 @@
 import Command from "./command.js";
+import Fist from "./fist.js";
 import Game from "./game.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
@@ -37,6 +38,14 @@ class Strip {
     } else {
       this.slide = this.slideVertically.bind(this);
     }
+  }
+
+  isFistOnStrip() {
+    for (const worker of Fist.workers) {
+      if (!this.isWorkerOnStrip(worker)) return false;
+    }
+
+    return true;
   }
 
   isWorkerOnStrip(worker) {

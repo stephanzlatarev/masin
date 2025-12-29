@@ -49,10 +49,14 @@ class Circuit {
       turn = this.turns[this.index];
     }
 
-    const mineral = getMineral(turn.mineral);
-    const direction = (mineral === Strip.home) ? Strip.ramp : mineral.pos;
+    if ((this.index === 0) && Strip.isFistOnStrip()) {
+      Clench.hard();
+    } else {
+      const mineral = getMineral(turn.mineral);
+      const direction = (mineral === Strip.home) ? Strip.ramp : mineral.pos;
 
-    Command.head(Fist.workers, mineral, direction);
+      Command.head(Fist.workers, mineral, direction);
+    }
   }
 
   reset() {

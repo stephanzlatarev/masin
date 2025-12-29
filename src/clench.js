@@ -1,14 +1,18 @@
+import Command from "./command.js";
 import Fist from "./fist.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
 
 const SPEED = 0.18; // About the distance SCV moves in a game loop
+const CLENCH_MARGIN_MIN = 0.01;
 const CLENCH_MARGIN = SPEED + SPEED;
 const ENEMY_MARGIN = 1; // About the radius of a worker and speed
 
 class Clench {
 
   soft() {
+    if (!Fist.workers.length) return;
+
     let front = -Infinity;
     let back = Infinity;
     let push = Infinity;
@@ -71,6 +75,45 @@ class Clench {
     }
   }
 
+  hard() {
+    if (!Fist.workers.length) return;
+
+    let head;
+    let tail;
+
+    for (const worker of Fist.workers) {
+      if (isEnemyClose(worker)) {
+        // Enemy is too close for hard clench
+        return Command.head(Fist.workers, Strip.mineral, Strip.mineral.pos);
+      }
+
+      if (!worker.projection) {
+        worker.projection = Strip.projection(worker);
+      }
+
+      if (!head || (worker.projection.s > head.projection.s)) {
+        head = worker;
+      }
+
+      if (!tail || (worker.projection.s < tail.projection.s)) {
+        tail = worker;
+      }
+    }
+
+    if (head.projection.s > tail.projection.s + CLENCH_MARGIN_MIN) {
+      const body = [...Fist.workers].splice(Fist.workers.indexOf(head), 1);
+      const pos = {
+        x: (head.pos.x + tail.pos.x) / 2,
+        y: (head.pos.y + tail.pos.y) / 2,
+      };
+
+      Command.align(head, pos, Strip.mineral, Strip.mineral.pos);
+      Command.head(body, Strip.mineral, Strip.mineral.pos);
+    } else {
+      Command.head(Fist.workers, Strip.mineral, Strip.mineral.pos);
+    }
+  }
+
   done() {
     const anchor = Fist.workers[0];
     if (!anchor) return false;
@@ -83,6 +126,14 @@ class Clench {
     return true;
   }
 
+}
+
+function isEnemyClose(worker) {
+  for (const enemy of Units.enemies.values()) {
+    if ((Math.abs(enemy.pos.x - worker.pos.x) < 2) && (Math.abs(enemy.pos.y - worker.pos.y) < 2)) {
+      return true;
+    }
+  }
 }
 
 export default new Clench();

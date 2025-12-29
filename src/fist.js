@@ -99,6 +99,9 @@ class Fist {
     // Move inside the enemy zone searching for enemy workers
     if (Zone.includes(this)) {
       Circuit.move();
+    } else if (Strip.isFistOnStrip()) {
+      Circuit.reset();
+      Clench.hard();
     } else {
       Circuit.reset();
       Command.head(this.workers, Strip.mineral, Strip.mineral.pos);
