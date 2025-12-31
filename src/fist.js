@@ -152,10 +152,20 @@ class Fist {
       return this.transition("cleanup");
     }
 
-    Command.amove(this.workers, Game.enemy);
+    if (isBroodlingInSight()) {
+      // Avoid the broodlings that appear when the fist destroys a zerg structure
+      Command.head(this.workers, Strip.home, Strip.ramp);
+    } else {
+      Command.amove(this.workers, Game.enemy);
+    }
   }
 
   cleanup() {
+    if (isBroodlingInSight()) {
+      // Avoid the broodlings that appear when the fist destroys a zerg structure
+      return Command.head(this.workers, Strip.home, Strip.ramp);
+    }
+
     if (this.victim) this.victim = Units.get(this.victim.tag);
 
     if (this.victim) {
@@ -202,6 +212,12 @@ class Fist {
 function isEnemyInSight() {
   for (const enemy of Units.enemies.values()) {
     if (enemy.isWorker) return true;
+  }
+}
+
+function isBroodlingInSight() {
+  for (const enemy of Units.enemies.values()) {
+    if (enemy.unitType === 289) return true;
   }
 }
 
