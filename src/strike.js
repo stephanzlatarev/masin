@@ -15,13 +15,7 @@ class Strike {
   }
 
   hit(enemy) {
-    for (const worker of Fist.workers) {
-      if (isTooClose(worker, Strip.mineral)) {
-        Command.strike(Fist.workers, enemy, Strip.home, Strip.ramp);
-      } else {
-        Command.strike(Fist.workers, enemy, Strip.mineral, Strip.mineral.pos);
-      }
-    }
+    Command.strike(Fist.workers, enemy, Strip.home, Strip.ramp);
   }
 
   rally() {
@@ -90,8 +84,10 @@ function getRallyTarget(worker) {
 }
 
 function isTooClose(worker, mineral) {
-  if (Math.abs(worker.pos.x - mineral.pos.x) <= 3.5) return true;
-  if (Math.abs(worker.pos.y - mineral.pos.y) <= 3.5) return true;
+  const adx = Math.abs(worker.pos.x - mineral.pos.x);
+  const ady = Math.abs(worker.pos.y - mineral.pos.y);
+
+  return (adx <= 3) && (ady <= 2);
 }
 
 function calculateDistance(a, b) {

@@ -51,10 +51,8 @@ class Clench {
     for (const worker of Fist.workers) {
       const projection = worker.projection;
 
-      if (projection.s <= 0) {
-        Strip.moveForth(worker);
-      } else if (Strip.isWorkerOnStrip(worker) || (projection.s <= 0)) {
-        if (projection.s <= back) {
+      if (Strip.isWorkerOnStrip(worker) || (projection.s <= 0)) {
+        if ((projection.s <= back) && !isTooClose(worker, Strip.mineral)) {
           // The worker is at the back of the fist
           Strip.moveForth(worker);
         } else {
@@ -134,6 +132,13 @@ function isEnemyClose(worker) {
       return true;
     }
   }
+}
+
+function isTooClose(worker, mineral) {
+  const adx = Math.abs(worker.pos.x - mineral.pos.x);
+  const ady = Math.abs(worker.pos.y - mineral.pos.y);
+
+  return (adx <= 3) && (ady <= 2);
 }
 
 export default new Clench();

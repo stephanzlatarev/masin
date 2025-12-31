@@ -11,6 +11,9 @@ const MIN_H = 0.1;
 // Maximum projection h for a worker to be considered near the strip
 const MAX_H = 4;
 
+const SLIDE_DIRECTION_HORIZONTAL = 1;
+const SLIDE_DIRECTION_VERTICAL = 2;
+
 class Strip {
 
   // The mineral at enemy base used to mineral walk in
@@ -28,15 +31,18 @@ class Strip {
   // The side of the enemy base depot building
   side;
 
+  // Slide either horizontally or vertically
+  slideDirection;
+
   init(ramp) {
     this.ramp = ramp;
     this.length = calculateDistance(ramp, this.mineral.pos);
     this.side = this.projection(Game.enemy).a;
 
     if (Math.abs(ramp.x - Game.enemy.x) > Math.abs(ramp.y - Game.enemy.y)) {
-      this.slide = this.slideHorizontally.bind(this);
+      this.slideDirection = SLIDE_DIRECTION_HORIZONTAL;
     } else {
-      this.slide = this.slideVertically.bind(this);
+      this.slideDirection = SLIDE_DIRECTION_VERTICAL;
     }
   }
 
@@ -69,58 +75,38 @@ class Strip {
   }
 
   moveBack(worker) {
-    Command.harvest(worker, this.home, this.ramp);
+    const projection = worker.projection || this.projection(worker);
+    const homeDirection = (projection.s <= 0) ? this.home.pos : this.ramp;
+
+    Command.harvest(worker, this.home, homeDirection);
   }
 
-  slideHorizontally(worker) {
-    let left = Math.min(worker.pos.x, worker.realpos.x);
-    let right = Math.max(worker.pos.x, worker.realpos.x);
-    let top = Math.min(worker.pos.y, worker.realpos.y);
-    let bottom = Math.max(worker.pos.y, worker.realpos.y);
+  slide(worker) {
+    const projection = worker.projection || this.projection(worker);
+    const homeDirection = (projection.s <= 0) ? this.home.pos : this.ramp;
 
-    if (this.ramp.x < right) left -= 2.0;
-    if (this.ramp.x > left) right += 2.0;
+    if (canSlideAlongProjection(this, worker)) {
+      Command.align(worker, projection, this.home, homeDirection);
+    } else if (canSlideAlongDepot(this, worker)) {
+      let via;
 
-    top -= 1.0;
-    bottom += 1.0;
+      if (this.slideDirection === SLIDE_DIRECTION_HORIZONTAL) {
+        const ratio = (worker.pos.y - this.ramp.y) / (this.mineral.pos.y - this.ramp.y);
 
-    if (isTooClose(worker, this.mineral)) {
-      Command.harvest(worker, this.home, this.ramp);
-    } else if (!isPathBlocked(left, top, right, bottom)) {
-      const ratio = (worker.pos.y - this.ramp.y) / (this.mineral.pos.y - this.ramp.y);
-      const pos = { x: this.ramp.x + (this.mineral.pos.x - this.ramp.x) * ratio, y: worker.pos.y };
+        via = { x: this.ramp.x + (this.mineral.pos.x - this.ramp.x) * ratio, y: worker.pos.y };
+      } else {
+        const ratio = (worker.pos.x - this.ramp.x) / (this.mineral.pos.x - this.ramp.x);
 
-      Command.align(worker, pos, this.home, pos);
+        via = { x: worker.pos.x, y: this.ramp.y + (this.mineral.pos.y - this.ramp.y) * ratio };
+      }
+
+      Command.align(worker, via, this.home, homeDirection);
+    } else if (isTooClose(worker, this.mineral)) {
+      Command.harvest(worker, this.home, homeDirection);
     } else if (Zone.front.includes(worker) || Zone.center.includes(worker)) {
       Command.harvest(worker, this.mineral, this.mineral.pos);
     } else {
-      Command.harvest(worker, this.home, this.ramp);
-    }
-  }
-
-  slideVertically(worker) {
-    let left = Math.min(worker.pos.x, worker.realpos.x);
-    let right = Math.max(worker.pos.x, worker.realpos.x);
-    let top = Math.min(worker.pos.y, worker.realpos.y);
-    let bottom = Math.max(worker.pos.y, worker.realpos.y);
-
-    left -= 1.0;
-    right += 1.0;
-
-    if (this.ramp.y < bottom) top -= 2.0;
-    if (this.ramp.y > top) bottom += 2.0;
-
-    if (isTooClose(worker, this.mineral)) {
-      Command.harvest(worker, this.home, this.ramp);
-    } else if (!isPathBlocked(left, top, right, bottom)) {
-      const ratio = (worker.pos.x - this.ramp.x) / (this.mineral.pos.x - this.ramp.x);
-      const pos = { x: worker.pos.x, y: this.ramp.y + (this.mineral.pos.y - this.ramp.y) * ratio };
-
-      Command.align(worker, pos, this.home, pos);
-    } else if (Zone.front.includes(worker) || Zone.center.includes(worker)) {
-      Command.harvest(worker, this.mineral, this.mineral.pos);
-    } else {
-      Command.harvest(worker, this.home, this.ramp);
+      Command.harvest(worker, this.home, homeDirection);
     }
   }
 
@@ -130,20 +116,68 @@ class Strip {
 
 }
 
-function isPathBlocked(left, top, right, bottom) {
+function canSlideAlongProjection(strip, worker) {
+  // Check if projection is too close to the mineral
+  if (worker.projection.s > strip.length - 2) return false;
+
+  // Check if an enemy worker is blocking the projection path
+  const a = worker.pos;
+  const b = worker.projection;
+  const distance = calculateDistance(a, b);
+
+  for (const one of Units.enemies.values()) {
+    const projection = project(a, b, distance, one.pos);
+    const margin = 1.0;
+
+    if (projection.s < -margin) continue;
+    if (projection.s > distance) continue;
+    if (projection.h > margin) continue;
+
+    return false;
+  }
+
+  return true;
+}
+
+function canSlideAlongDepot(strip, worker) {
+  let left = Math.min(worker.pos.x, worker.realpos.x);
+  let right = Math.max(worker.pos.x, worker.realpos.x);
+  let top = Math.min(worker.pos.y, worker.realpos.y);
+  let bottom = Math.max(worker.pos.y, worker.realpos.y);
+
+  if (strip.slideDirection === SLIDE_DIRECTION_HORIZONTAL) {
+    // Slide horizontally
+    if (strip.ramp.x < right) left -= 2.0;
+    if (strip.ramp.x > left) right += 2.0;
+
+    top -= 1.0;
+    bottom += 1.0;
+  } else {
+    // Slide vertically
+    left -= 1.0;
+    right += 1.0;
+
+    if (strip.ramp.y < bottom) top -= 2.0;
+    if (strip.ramp.y > top) bottom += 2.0;
+  }
+
   for (const one of Units.enemies.values()) {
     if (one.pos.x < left) continue;
     if (one.pos.x > right) continue;
     if (one.pos.y < top) continue;
     if (one.pos.y > bottom) continue;
 
-    return true;
+    return false;
   }
+
+  return true;
 }
 
 function isTooClose(worker, mineral) {
-  if (Math.abs(worker.pos.x - mineral.pos.x) <= 3) return true;
-  if (Math.abs(worker.pos.y - mineral.pos.y) <= 2) return true;
+  const adx = Math.abs(worker.pos.x - mineral.pos.x);
+  const ady = Math.abs(worker.pos.y - mineral.pos.y);
+
+  return (adx <= 3) && (ady <= 2);
 }
 
 function calculateDistance(a, b) {
