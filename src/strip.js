@@ -177,7 +177,7 @@ function isTooClose(worker, mineral) {
   const adx = Math.abs(worker.pos.x - mineral.pos.x);
   const ady = Math.abs(worker.pos.y - mineral.pos.y);
 
-  return (adx <= 3) && (ady <= 2);
+  return (adx < 1.5) && (ady < 1);
 }
 
 function calculateDistance(a, b) {

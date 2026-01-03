@@ -24,15 +24,11 @@ class Strike {
     for (const worker of Fist.workers) {
       const target = getRallyTarget(worker);
 
-      if ((worker.order.abilityId === 295) && (worker.order.targetUnitTag === target.tag)) {
-        // Worker is moving in the right direction. Wait until it leaves the back zones.
-        if (Zone.center.includes(worker) || Zone.back.includes(worker)) {
-          isRallying = true;
-        }
-      } else {
-        Command.harvest(worker, target, (target === Strip.home) ? Strip.ramp : target.pos);
+      if ((worker.order.abilityId != 295) || Zone.center.includes(worker) || Zone.back.includes(worker)) {
         isRallying = true;
       }
+
+      Command.harvest(worker, target, (target === Strip.home) ? Strip.ramp : target.pos);
     }
 
     return isRallying;
@@ -87,7 +83,7 @@ function isTooClose(worker, mineral) {
   const adx = Math.abs(worker.pos.x - mineral.pos.x);
   const ady = Math.abs(worker.pos.y - mineral.pos.y);
 
-  return (adx <= 3) && (ady <= 2);
+  return (adx < 1.5) && (ady < 1);
 }
 
 function calculateDistance(a, b) {
