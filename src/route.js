@@ -5,10 +5,11 @@ import Lane from "./lane.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
+import project from "./projection.js";
 
-let end;
 let scout;
 let sources = [];
+let turn = { x: 0, y: 0, da: 0 };
 
 class Route {
 
@@ -31,14 +32,35 @@ class Route {
       const section = findFirstSection();
 
       if (section) {
+        scout = section.worker;
+
         Strip.home = section.source;
         Strip.mineral = section.destination;
       }
     }
 
-    if (scout && (calculateDistance(scout.realpos, Game.enemy) < end)) {
-      // The scout reached the enemy base. Complete the strip.
-      Strip.init(scout.realpos);
+    if (scout) {
+      if (scout.realpos.z < Units.base.realpos.z - 1.9) {
+        // The scout is one level below. Wait until it goes trhough the ramp
+        turn = { x: 0, y: 0, da: 0 };
+      } else {
+        const da = Math.abs(scout.facing - scout.lastfacing);
+
+        if (da > turn.da) {
+          turn.x = scout.realpos.x;
+          turn.y = scout.realpos.y;
+          turn.da = da;
+        }
+      }
+    }
+
+    if (scout && !Strip.length && isDestinationMineralInSight()) {
+      // The scout reached the enemy base and is approaching the strip mineral at the right angle. Complete the strip.
+      const projection = project(scout.lastrealpos, scout.realpos, 0, Strip.mineral.pos);
+      const end = { x: projection.x, y: projection.y };
+      const start = getPositionAtSightDistance(end, turn);
+
+      Strip.init(start, end);
 
       Zone.init();
       Lane.order();
@@ -126,14 +148,23 @@ function findFirstSection() {
     if (calculateDistance(worker.realpos, Units.base.pos) > 6) {
       const source = findSourceMineral(worker.realpos);
       const destination = findDestinationMineral(source);
-      const enemyRamp = getSymmetricalPos(worker.realpos);
 
-      scout = worker;
-      end = calculateDistance(Game.enemy, enemyRamp) - 3;
-
-      return { source, destination };
+      return { worker, source, destination };
     }
   }
+}
+
+function isDestinationMineralInSight() {
+  return (calculateDistance(scout.realpos, Strip.mineral.pos) <= 8);
+}
+
+function getPositionAtSightDistance(a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const dd = calculateDistance(a, b);
+  const df = 8 / dd;
+
+  return { x: a.x + dx * df, y: a.y + dy * df };
 }
 
 function didTurn(worker) {

@@ -100,44 +100,22 @@ function showStrip() {
       color: "gold",
       opacity: 1,
     });
+
+    shapes.push({
+      shape: "line",
+      width: 0.5,
+      x1: Strip.mineral.pos.x, y1: Strip.mineral.pos.y,
+      x2: Strip.ramp.x, y2: Strip.ramp.y,
+      color: getFistColor(),
+      opacity: 1,
+    });
   }
 }
 
 function showFist() {
-  if (!Fist.workers || !Fist.workers[0]) return;
+  if (!Fist.workers) return;
 
-  const workers = [...Fist.workers];
-  const clenching = (Fist.mode === "clench");
-
-  if (clenching) {
-    workers.sort((a, b) => (a.projection?.s - b.projection?.s));
-  }
-
-  const mode = ("          " + Fist.mode).slice(-7);
-  text.push("FIST       " + mode + " | HP" + (clenching ? " |  s   |  h   | side" : ""));
-
-  for (const worker of workers) {
-    const line = [
-      worker.tag,
-      threeletter("", Math.floor(worker.pos.x)) + ":" + threeletter("", Math.floor(worker.pos.y)),
-      "|", Math.floor(worker.health),
-    ];
-
-    if (worker.projection) {
-      line.push("|", (worker.projection.s - workers[0].projection.s).toFixed(2));
-      line.push("|", worker.projection.h.toFixed(2));
-
-      if (Strip.isWorkerNearStrip(worker)) {
-        if (worker.projection.a === Strip.side) {
-          line.push("|", "in");
-        } else {
-          line.push("|", "out");
-        }
-      }
-    }
-
-    text.push(line.join(" "));
-
+  for (const worker of Fist.workers) {
     shapes.push({
       shape: "circle",
       r: 0.45,
@@ -156,19 +134,60 @@ function showFist() {
       opacity: 1,
       color: "black",
     });
+
+    if (worker.lastrealpos) {
+      const dx = worker.realpos.x - worker.lastrealpos.x;
+      const dy = worker.realpos.y - worker.lastrealpos.y;
+      const dr = Math.sqrt(dx * dx + dy * dy);
+      const df = (dr > 0) ? 20 / dr : 0;
+
+      shapes.push({
+        shape: "line",
+        width: 0.1,
+        x1: worker.lastrealpos.x, y1: worker.lastrealpos.y,
+        x2: worker.lastrealpos.x + dx * df, y2: worker.lastrealpos.y + dy * df,
+        color: "white",
+        opacity: 1,
+      });
+    }
+  }
+
+  if (!Strip.length) return;
+
+  const workers = [...Fist.workers];
+
+  for (const worker of workers) {
+    if (!worker.projection) {
+      worker.projection = Strip.projection(worker);
+    }
+  }
+
+  workers.sort((a, b) => (a.projection.s - b.projection.s));
+
+  const mode = ("          " + Fist.mode).slice(-7);
+  text.push("FIST       " + mode + " | HP |  s   |  h   | side");
+
+  for (const worker of workers) {
+    const line = [
+      worker.tag,
+      threeletter("", Math.floor(worker.pos.x)) + ":" + threeletter("", Math.floor(worker.pos.y)),
+      "|", Math.floor(worker.health),
+    ];
+
+    line.push("|", (worker.projection.s - workers[0].projection.s).toFixed(2));
+    line.push("|", worker.projection.h.toFixed(2));
+
+    if (Strip.isWorkerNearStrip(worker)) {
+      if (worker.projection.a === Strip.side) {
+        line.push("|", "in");
+      } else {
+        line.push("|", "out");
+      }
+    }
+
+    text.push(line.join(" "));
   }
   text.push("");
-
-  if (Strip.length) {
-    shapes.push({
-      shape: "line",
-      width: 0.5,
-      x1: Strip.mineral.pos.x, y1: Strip.mineral.pos.y,
-      x2: Strip.ramp.x, y2: Strip.ramp.y,
-      color: getFistColor(),
-      opacity: 1,
-    });
-  }
 }
 
 function getFistColor() {

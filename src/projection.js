@@ -1,5 +1,7 @@
 
 export default function(a, b, length, p) {
+  length = length || calculateDistance(a, b);
+
   const bx = b.x - a.x;
   const by = b.y - a.y;
   const px = p.x - a.x;
@@ -14,4 +16,8 @@ export default function(a, b, length, p) {
   const y = a.y + s * by / length;
 
   return { x, y, s, h, a: Math.sign(w) };
+}
+
+function calculateDistance(a, b) {
+  return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }

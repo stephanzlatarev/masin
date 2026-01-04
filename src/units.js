@@ -19,7 +19,7 @@ class Units {
     const minerals = new Map();
 
     for (const unit of Game.units) {
-      unit.realpos = { x: unit.pos.x, y: unit.pos.y };
+      unit.realpos = { x: unit.pos.x, y: unit.pos.y, z: unit.pos.z };
 
       if (IS_WORKER[unit.unitType]) {
         unit.isWorker = true;
