@@ -35,7 +35,6 @@ class Route {
         scout = section.worker;
 
         Strip.home = section.source;
-        Strip.mineral = section.destination;
       }
     }
 
@@ -50,6 +49,8 @@ class Route {
           turn.x = scout.realpos.x;
           turn.y = scout.realpos.y;
           turn.da = da;
+
+          Strip.mineral = findDestinationMineral(scout.realpos);
         }
       }
     }
@@ -109,34 +110,23 @@ function findSourceMineral(pos) {
   return bestMineral;
 }
 
-function findDestinationMineral(source) {
-  const { x, y } = getSymmetricalPos(source.pos);
+function findDestinationMineral(pos) {
+  let bestMineral;
+  let bestDistance = Infinity;
 
   for (const one of Units.minerals.values()) {
-    if (one.pos.x !== x) continue;
-    if (one.pos.y !== y) continue;
+    if (Math.abs(one.pos.x - Game.enemy.x) > 8) continue;
+    if (Math.abs(one.pos.y - Game.enemy.y) > 8) continue;
 
-    return one;
-  }
-}
+    const distance = calculateDistance(one.pos, pos);
 
-function getSymmetricalPos(pos) {
-  let x;
-  let y;
-
-  if (Game.enemy.x === Units.base.pos.x) {
-    x = pos.x;
-  } else {
-    x = Game.enemy.x - (pos.x - Units.base.pos.x);
+    if (distance < bestDistance) {
+      bestMineral = one;
+      bestDistance = distance;
+    }
   }
 
-  if (Game.enemy.y === Units.base.pos.y) {
-    y = pos.y;
-  } else {
-    y = Game.enemy.y - (pos.y - Units.base.pos.y);
-  }
-
-  return { x, y };
+  return bestMineral;
 }
 
 function findFirstSection() {
@@ -146,10 +136,7 @@ function findFirstSection() {
     if (!didTurn(worker)) continue;
 
     if (calculateDistance(worker.realpos, Units.base.pos) > 6) {
-      const source = findSourceMineral(worker.realpos);
-      const destination = findDestinationMineral(source);
-
-      return { worker, source, destination };
+      return { worker, source: findSourceMineral(worker.realpos) };
     }
   }
 }
