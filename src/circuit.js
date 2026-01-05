@@ -1,3 +1,4 @@
+import Clench from "./clench.js";
 import Command from "./command.js";
 import Fist from "./fist.js";
 import Game from "./game.js";
