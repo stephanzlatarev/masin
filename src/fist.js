@@ -9,6 +9,8 @@ import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 
+const FEW_ENEMY_WORKERS = 3;
+
 class Fist {
 
   mode = "move";
@@ -91,8 +93,8 @@ class Fist {
       }
     }
 
-    // If no enemy workers are near the enemy depot building then destroy it
-    if (Zone.center.includes(this) && !isEnemyInSight()) {
+    // If few enemy workers are near the enemy depot building then destroy it
+    if (Zone.center.includes(this) && (countEnemyInSight() <= FEW_ENEMY_WORKERS)) {
       return this.transition("smash");
     }
 
@@ -140,7 +142,7 @@ class Fist {
   }
 
   smash() {
-    if (isEnemyInSight()) {
+    if (countEnemyInSight() > FEW_ENEMY_WORKERS) {
       return this.transition("seek");
     }
 
@@ -213,6 +215,16 @@ function isEnemyInSight() {
   for (const enemy of Units.enemies.values()) {
     if (enemy.isWorker) return true;
   }
+}
+
+function countEnemyInSight() {
+  let count = 0;
+
+  for (const enemy of Units.enemies.values()) {
+    if (enemy.isWorker) count++;
+  }
+
+  return count;
 }
 
 function isBroodlingInSight() {
