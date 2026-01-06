@@ -126,6 +126,8 @@ function canSlideAlongProjection(strip, worker) {
   const distance = calculateDistance(a, b);
 
   for (const one of Units.enemies.values()) {
+    if (!one.hasWeapons) continue;
+
     const projection = project(a, b, distance, one.pos);
     const margin = 1.0;
 
@@ -162,6 +164,7 @@ function canSlideAlongDepot(strip, worker) {
   }
 
   for (const one of Units.enemies.values()) {
+    if (!one.hasWeapons) continue;
     if (one.pos.x < left) continue;
     if (one.pos.x > right) continue;
     if (one.pos.y < top) continue;
