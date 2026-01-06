@@ -7,6 +7,7 @@ class Jobs {
   defenders = [];
   fist = [];
   miners = [];
+  shooters = [];
 
   start() {
     const workers = Game.units.filter(unit => (unit.unitType === 45));
@@ -21,12 +22,19 @@ class Jobs {
     this.defenders = syncUnits(this.defenders);
     this.fist = syncUnits(this.fist);
     this.miners = syncUnits(this.miners);
+    this.shooters = syncUnits(this.shooters);
 
-    const active = new Set([...this.fist, ...this.miners]);
+    const active = new Set([...this.fist, ...this.miners, ...this.shooters]);
 
     for (const worker of Units.workers.values()) {
       if (!active.has(worker)) {
         this.miners.push(worker);
+      }
+    }
+
+    for (const shooter of Units.shooters.values()) {
+      if (!active.has(shooter)) {
+        this.shooters.push(shooter);
       }
     }
   }
@@ -50,11 +58,15 @@ class Jobs {
   hireDefenders() {
     this.defenders = this.miners;
     this.miners = [];
+
+    return this.defenders;
   }
 
   releaseDefenders() {
     this.miners = this.defenders;
     this.defenders = [];
+
+    return this.miners;
   }
 
 }

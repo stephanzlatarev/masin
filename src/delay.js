@@ -25,7 +25,7 @@ class Delay {
   syncUnit(unit) {
     if (this.mode) {
       // Handle the real or simulated delay
-      if (!unit.isWorker) return;
+      if (!unit.isWorker && !unit.isShooter) return;
       if ((unit.owner !== 1) && (unit.owner !== 2)) return;
 
       if (unit.owner === Game.playerId) {

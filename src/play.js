@@ -7,6 +7,7 @@ import Lane from "./lane.js";
 import Liftoff from "./liftoff.js";
 import Mining from "./mining.js";
 import Route from "./route.js";
+import Shoot from "./shoot.js";
 import Units from "./units.js";
 
 const LOOPS_PER_SECOND = 22.4;
@@ -43,8 +44,9 @@ export default async function() {
     Defense.sync();
     Liftoff.sync();
     Build.sync();
+    Shoot.sync();
 
-    if (!Jobs.fist.length) {
+    if (!Jobs.fist.length && !Jobs.shooter.length) {
       // We lost our fist
       await Game.end();
       break;

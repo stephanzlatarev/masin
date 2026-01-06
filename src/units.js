@@ -3,6 +3,7 @@ import Game from "./game.js";
 
 const IS_WORKER = { 45: true, 84: true, 104: true };
 const IS_DEPOT = { 18: true, 59: true, 86: true };
+const IS_SHOOTER = { 34: true, 35: true, 48: true };
 
 const HAS_WEAPONS = {
   ...IS_WORKER,
@@ -22,6 +23,7 @@ class Units {
   async sync() {
     const units = new Map();
     const workers = new Map();
+    const shooters = new Map();
     const enemies = new Map();
     const minerals = new Map();
 
@@ -30,6 +32,8 @@ class Units {
 
       if (IS_WORKER[unit.unitType]) {
         unit.isWorker = true;
+      } else if (IS_SHOOTER[unit.unitType]) {
+        unit.isShooter = true;
       } else if (unit.unitType === 105) {
         unit.isZergling = true;
       } else if ((unit.owner === 16) && (unit.radius > 1) && (unit.radius < 1.2)) {
@@ -52,6 +56,8 @@ class Units {
       if (unit.owner === Game.playerId) {
         if (unit.isWorker) {
           workers.set(unit.tag, unit);
+        } else if (unit.isShooter) {
+          shooters.set(unit.tag, unit);
         } else if (IS_DEPOT[unit.unitType] || (unit.tag === this.base?.tag)) {
           this.base = unit;
         }
@@ -67,6 +73,7 @@ class Units {
 
     this.units = units;
     this.workers = workers;
+    this.shooters = shooters;
     this.enemies = enemies;
     this.minerals = minerals;
   }
