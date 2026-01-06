@@ -1,3 +1,4 @@
+import Build from "./build.js";
 import Defense from "./defense.js";
 import Game from "./game.js";
 import Hire from "./hire.js";
@@ -28,6 +29,7 @@ export default async function() {
   Lane.start();
   Route.start();
   Hire.start();
+  Build.start();
 
   while (true) {
     Units.sync();

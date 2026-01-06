@@ -51,6 +51,10 @@ class Command {
     this.commands.push({ unitTags: [unit.tag], abilityId: 417, queueCommand: true });
   }
 
+  train(facility, type) {
+    this.commands.push({ unitTags: [facility.tag], abilityId: type });
+  }
+
   step() {
     this.commands.length = 0;
   }
