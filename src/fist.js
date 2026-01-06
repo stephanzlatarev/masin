@@ -238,7 +238,7 @@ function getNearEnemyCount(fist) {
   let count = 0;
 
   for (const enemy of Units.enemies.values()) {
-    if (!enemy.isWorker) continue;
+    if (!enemy.hasWeapons) continue;
 
     const b = enemy.pos;
 
