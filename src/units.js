@@ -4,6 +4,13 @@ import Game from "./game.js";
 const IS_WORKER = { 45: true, 84: true, 104: true };
 const IS_DEPOT = { 18: true, 59: true, 86: true };
 
+const HAS_WEAPONS = {
+  ...IS_WORKER,
+  73: true,  // Zealot
+  105: true, // Zergling
+  289: true, // Broodling
+};
+
 class Units {
 
   base = null;
@@ -27,6 +34,10 @@ class Units {
         unit.isZergling = true;
       } else if ((unit.owner === 16) && (unit.radius > 1) && (unit.radius < 1.2)) {
         unit.isMineral = true;
+      }
+
+      if (HAS_WEAPONS[unit.unitType]) {
+        unit.hasWeapons = true;
       }
 
       const previous = this.units.get(unit.tag);

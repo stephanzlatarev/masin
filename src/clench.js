@@ -13,6 +13,7 @@ class Clench {
   soft() {
     if (!Fist.workers.length) return;
 
+    let isSafe = true;
     let front = -Infinity;
     let back = Infinity;
     let push = Infinity;
@@ -32,6 +33,8 @@ class Clench {
     }
 
     for (const enemy of Units.enemies.values()) {
+      if (!enemy.hasWeapons) continue;
+
       const projection = Strip.projection(enemy);
 
       if (projection.h > ENEMY_MARGIN) continue;
@@ -44,6 +47,7 @@ class Clench {
     if (back + CLENCH_MARGIN > push) {
       // Make sure clenching happens closer to home
       back = -Infinity;
+      isSafe = false;
     } else {
       back += CLENCH_MARGIN;
     }
@@ -56,6 +60,9 @@ class Clench {
       } else if (Strip.isWorkerOnStrip(worker) || (projection.s <= 0)) {
         if (projection.s <= back) {
           // The worker is at the back of the fist
+          Strip.moveForth(worker);
+        } else if (isSafe && (projection.s < CLENCH_MARGIN)) {
+          // Keep strip end in sight so that movements is exactly on strip
           Strip.moveForth(worker);
         } else {
           Strip.moveBack(worker);
@@ -130,6 +137,8 @@ class Clench {
 
 function isEnemyClose(worker) {
   for (const enemy of Units.enemies.values()) {
+    if (!enemy.hasWeapons) continue;
+
     if ((Math.abs(enemy.pos.x - worker.pos.x) < 2) && (Math.abs(enemy.pos.y - worker.pos.y) < 2)) {
       return true;
     }
