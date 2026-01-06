@@ -122,17 +122,29 @@ class Clench {
   }
 
   done() {
-    const anchor = Fist.workers[0];
-    if (!anchor) return false;
-
-    for (const worker of Fist.workers) {
-      if (Math.abs(worker.pos.x - anchor.pos.x) > CLENCH_MARGIN) return false;
-      if (Math.abs(worker.pos.y - anchor.pos.y) > CLENCH_MARGIN) return false;
-    }
-
-    return true;
+    return isClenched(CLENCH_MARGIN);
   }
 
+  fits() {
+    return isClenched(CLENCH_MARGIN + 0.2);
+  }
+
+}
+
+function isClenched(margin) {
+  let minx = +Infinity;
+  let maxx = -Infinity;
+  let miny = +Infinity;
+  let maxy = -Infinity;
+
+  for (const worker of Fist.workers) {
+    minx = Math.min(worker.pos.x, minx);
+    maxx = Math.max(worker.pos.x, maxx);
+    miny = Math.min(worker.pos.x, miny);
+    maxy = Math.max(worker.pos.x, maxy);
+  }
+
+  return (maxx - minx <= margin) && (maxy - miny <= margin);
 }
 
 function isEnemyClose(worker) {

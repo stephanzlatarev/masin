@@ -70,7 +70,7 @@ class Fist {
       return this.transition("repair");
     }
 
-    if (!Clench.done()) {
+    if (!Clench.fits()) {
       return this.transition("clench");
     }
 
