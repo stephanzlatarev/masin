@@ -42,12 +42,12 @@ class Clench {
       if (projection.s > front + ENEMY_MARGIN) continue;
 
       push = Math.min(projection.s - ENEMY_MARGIN, push);
+      isSafe = false;
     }
 
     if (back + CLENCH_MARGIN > push) {
       // Make sure clenching happens closer to home
       back = -Infinity;
-      isSafe = false;
     } else {
       back += CLENCH_MARGIN;
     }
