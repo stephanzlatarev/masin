@@ -222,6 +222,7 @@ function countEnemyInSight() {
 
   for (const enemy of Units.enemies.values()) {
     if (enemy.isWorker) count++;
+    if (enemy.isZergling) count++;
   }
 
   return count;

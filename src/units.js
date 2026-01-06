@@ -23,6 +23,8 @@ class Units {
 
       if (IS_WORKER[unit.unitType]) {
         unit.isWorker = true;
+      } else if (unit.unitType === 105) {
+        unit.isZergling = true;
       } else if ((unit.owner === 16) && (unit.radius > 1) && (unit.radius < 1.2)) {
         unit.isMineral = true;
       }

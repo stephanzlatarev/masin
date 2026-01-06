@@ -60,7 +60,7 @@ class Strike {
 
 function isValidTarget(enemy) {
   if (enemy.isWorker) return true;
-  if (enemy.unitType === 105) return true; // Zergling
+  if (enemy.isZergling) return true;
 }
 
 function canStrike(workers, enemy) {
