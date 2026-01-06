@@ -5,6 +5,7 @@ import Jobs from "./jobs.js";
 import Fist from "./fist.js";
 import Lane from "./lane.js";
 import Liftoff from "./liftoff.js";
+import Mining from "./mining.js";
 import Route from "./route.js";
 import Units from "./units.js";
 
@@ -38,8 +39,10 @@ export default async function() {
     Route.sync();
     Jobs.sync();
     Fist.sync();
+    Mining.sync();
     Defense.sync();
     Liftoff.sync();
+    Build.sync();
 
     if (!Jobs.fist.length) {
       // We lost our fist

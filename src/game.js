@@ -76,7 +76,7 @@ class Game {
     this.enemy = gameInfo.startRaw.startLocations[0];
     this.units = observation.observation.rawData.units;
 
-    this.playerId = this.units.find(unit => (unit.unitType === 18)).owner;
+    this.playerId = observation.observation.playerCommon.playerId;
     this.enemy.playerId = (3 - this.playerId);
 
     console.log("Player:", this.playerId);
@@ -106,6 +106,7 @@ class Game {
     const observation = response.observation;
 
     this.loop = observation.gameLoop;
+    this.minerals = observation.playerCommon.minerals;
     this.units = observation.rawData.units;
   }
 

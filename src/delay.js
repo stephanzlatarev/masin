@@ -85,9 +85,9 @@ function getDelayedOrder(delay, unit) {
 
   if (list) {
     return list.after0[0] || unit.orders[0] || {};
-  } else {
-
   }
+
+  return {};
 }
 
 function getDelayedPosition(delay, unit) {

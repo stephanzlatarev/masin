@@ -11,13 +11,13 @@ class Defense {
     const enemy = getEnemyWorker(Jobs.miners);
 
     if (enemy) {
-      for (const worker of Jobs.miners) {
+      for (const worker of Jobs.hireDefenders()) {
         Command.attack(worker, enemy);
       }
 
       this.isDefending = true;
     } else if (this.isDefending) {
-      for (const worker of Jobs.miners) {
+      for (const worker of Jobs.releaseDefenders()) {
         Command.harvest(worker, Strip.home);
       }
 
