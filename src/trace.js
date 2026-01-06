@@ -1,5 +1,6 @@
 import Game from "./game.js";
 import Fist from "./fist.js";
+import Jobs from "./jobs.js";
 import Lane from "./lane.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
@@ -113,9 +114,9 @@ function showStrip() {
 }
 
 function showFist() {
-  if (!Fist.workers) return;
+  if (!Jobs.fist) return;
 
-  for (const worker of Fist.workers) {
+  for (const worker of Jobs.fist) {
     shapes.push({
       shape: "circle",
       r: 0.45,
@@ -154,7 +155,7 @@ function showFist() {
 
   if (!Strip.length) return;
 
-  const workers = [...Fist.workers];
+  const workers = [...Jobs.fist];
 
   for (const worker of workers) {
     if (!worker.projection) {
@@ -202,9 +203,9 @@ function getFistColor() {
 }
 
 function showClench() {
-  if (!Fist.workers) return;
+  if (!Jobs.fist) return;
 
-  for (const worker of Fist.workers) {
+  for (const worker of Jobs.fist) {
     if (!worker.projection) continue;
 
     shapes.push({

@@ -1,5 +1,5 @@
 import Command from "./command.js";
-import Fist from "./fist.js";
+import Jobs from "./jobs.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
 
@@ -11,7 +11,7 @@ const ENEMY_MARGIN = 1; // About the radius of a worker and speed
 class Clench {
 
   soft() {
-    if (!Fist.workers.length) return;
+    if (!Jobs.fist.length) return;
 
     let isSafe = true;
     let front = -Infinity;
@@ -19,7 +19,7 @@ class Clench {
     let push = Infinity;
     let sides = new Set();
 
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       const projection = Strip.projection(worker);
 
       worker.projection = projection;
@@ -52,7 +52,7 @@ class Clench {
       back += CLENCH_MARGIN;
     }
 
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       const projection = worker.projection;
 
       if (isTooClose(worker, Strip.mineral)) {
@@ -83,15 +83,15 @@ class Clench {
   }
 
   hard() {
-    if (!Fist.workers.length) return;
+    if (!Jobs.fist.length) return;
 
     let head;
     let tail;
 
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       if (isEnemyClose(worker)) {
         // Enemy is too close for hard clench
-        return Command.head(Fist.workers, Strip.mineral, Strip.mineral.pos);
+        return Command.head(Jobs.fist, Strip.mineral, Strip.mineral.pos);
       }
 
       if (!worker.projection) {
@@ -108,7 +108,7 @@ class Clench {
     }
 
     if (head.projection.s > tail.projection.s + CLENCH_MARGIN_MIN) {
-      const body = [...Fist.workers].splice(Fist.workers.indexOf(head), 1);
+      const body = [...Jobs.fist].splice(Jobs.fist.indexOf(head), 1);
       const pos = {
         x: (head.pos.x + tail.pos.x) / 2,
         y: (head.pos.y + tail.pos.y) / 2,
@@ -117,7 +117,7 @@ class Clench {
       Command.align(head, pos, Strip.mineral, Strip.mineral.pos);
       Command.head(body, Strip.mineral, Strip.mineral.pos);
     } else {
-      Command.head(Fist.workers, Strip.mineral, Strip.mineral.pos);
+      Command.head(Jobs.fist, Strip.mineral, Strip.mineral.pos);
     }
   }
 
@@ -137,7 +137,7 @@ function isClenched(margin) {
   let miny = +Infinity;
   let maxy = -Infinity;
 
-  for (const worker of Fist.workers) {
+  for (const worker of Jobs.fist) {
     minx = Math.min(worker.pos.x, minx);
     maxx = Math.max(worker.pos.x, maxx);
     miny = Math.min(worker.pos.x, miny);

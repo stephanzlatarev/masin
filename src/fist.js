@@ -2,6 +2,7 @@ import Clench from "./clench.js";
 import Circuit from "./circuit.js";
 import Command from "./command.js";
 import Game from "./game.js";
+import Jobs from "./jobs.js";
 import Lane from "./lane.js";
 import Repair from "./repair.js";
 import Strike from "./strike.js";
@@ -20,21 +21,9 @@ class Fist {
   victim = null;
 
   sync() {
-    const workers = new Set();
+    if (!Jobs.fist.length) return;
 
-    for (const one of this.workers) {
-      const worker = Units.get(one.tag);
-
-      if (worker) {
-        workers.add(worker);
-      }
-    }
-
-    this.workers = [...workers];
-
-    if (!this.workers.length) return;
-
-    this.pos = this.workers[0].pos;
+    this.pos = Jobs.fist[0].pos;
     this.x = this.pos.x;
     this.y = this.pos.y;
 
@@ -48,7 +37,7 @@ class Fist {
   }
 
   move() {
-    Command.head(this.workers, Strip.mineral);
+    Command.head(Jobs.fist, Strip.mineral);
 
     if (Strip.length && (Zone.includes(this) || isEnemyInSight())) {
       this.transition("clench");
@@ -89,7 +78,7 @@ class Fist {
       const target = lane.getTarget();
 
       if (target) {
-        return Command.head(this.workers, lane.mineral, lane.mineral.pos);
+        return Command.head(Jobs.fist, lane.mineral, lane.mineral.pos);
       }
     }
 
@@ -106,7 +95,7 @@ class Fist {
       Clench.hard();
     } else {
       Circuit.reset();
-      Command.head(this.workers, Strip.mineral, Strip.mineral.pos);
+      Command.head(Jobs.fist, Strip.mineral, Strip.mineral.pos);
     }
   }
 
@@ -134,8 +123,8 @@ class Fist {
   repair() {
     if (Repair.isComplete()) {
       this.transition("move");
-    } else if (getNearEnemyCount(this) >= 3) {
-      Command.head(this.workers, Strip.home, Strip.ramp);
+    } else if (getNearEnemyCount() >= 3) {
+      Command.head(Jobs.fist, Strip.home, Strip.ramp);
     } else {
       Repair.run();
     }
@@ -146,7 +135,7 @@ class Fist {
       return this.transition("seek");
     }
 
-    for (const worker of this.workers) {
+    for (const worker of Jobs.fist) {
       if (Math.abs(worker.pos.x - Game.enemy.x) > 2) continue;
       if (Math.abs(worker.pos.y - Game.enemy.y) > 2) continue;
 
@@ -156,32 +145,32 @@ class Fist {
 
     if (isBroodlingInSight()) {
       // Avoid the broodlings that appear when the fist destroys a zerg structure
-      Command.head(this.workers, Strip.home, Strip.ramp);
+      Command.head(Jobs.fist, Strip.home, Strip.ramp);
     } else {
-      Command.amove(this.workers, Game.enemy);
+      Command.amove(Jobs.fist, Game.enemy);
     }
   }
 
   cleanup() {
     if (isBroodlingInSight()) {
       // Avoid the broodlings that appear when the fist destroys a zerg structure
-      return Command.head(this.workers, Strip.home, Strip.ramp);
+      return Command.head(Jobs.fist, Strip.home, Strip.ramp);
     }
 
     if (this.victim) this.victim = Units.get(this.victim.tag);
 
     if (this.victim) {
-      Command.amove(this.workers, this.victim.pos);
+      Command.amove(Jobs.fist, this.victim.pos);
     } else if (Units.enemies.size) {
       // if not flying
       for (const enemy of Units.enemies.values()) {
         if (enemy.isFlying) continue;
 
         this.victim = enemy;
-        Command.amove(this.workers, this.victim.pos);
+        Command.amove(Jobs.fist, this.victim.pos);
       }
     } else {
-      for (const one of this.workers) {
+      for (const one of Jobs.fist) {
         if (!one.order.abilityId) {
           const x = Game.left + (Game.right - Game.left) * Math.random();
           const y = Game.top + (Game.bottom - Game.top) * Math.random();
@@ -197,7 +186,7 @@ class Fist {
     let max = 0;
     let min = Infinity;
 
-    for (const worker of this.workers) {
+    for (const worker of Jobs.fist) {
       total += worker.health;
       max = Math.max(worker.health, max);
       min = Math.min(worker.health, min);
@@ -234,7 +223,7 @@ function isBroodlingInSight() {
   }
 }
 
-function getNearEnemyCount(fist) {
+function getNearEnemyCount() {
   let count = 0;
 
   for (const enemy of Units.enemies.values()) {
@@ -242,7 +231,7 @@ function getNearEnemyCount(fist) {
 
     const b = enemy.pos;
 
-    for (const worker of fist.workers) {
+    for (const worker of Jobs.fist) {
       const a = worker.pos;
 
       if ((Math.abs(a.x - b.x) <= 3) && (Math.abs(a.y - b.y) <= 3)) {

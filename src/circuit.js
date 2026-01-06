@@ -2,6 +2,7 @@ import Clench from "./clench.js";
 import Command from "./command.js";
 import Fist from "./fist.js";
 import Game from "./game.js";
+import Jobs from "./jobs.js";
 import Lane from "./lane.js";
 import Strip from "./strip.js";
 import Zone from "./zone.js";
@@ -56,7 +57,7 @@ class Circuit {
       const mineral = getMineral(turn.mineral);
       const direction = (mineral === Strip.home) ? Strip.ramp : mineral.pos;
 
-      Command.head(Fist.workers, mineral, direction);
+      Command.head(Jobs.fist, mineral, direction);
     }
   }
 

@@ -1,10 +1,10 @@
 import Command from "./command.js";
-import Fist from "./fist.js";
+import Jobs from "./jobs.js";
 
 class Repair {
 
   isNeeded() {
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       if (worker.health <= 20) {
         return true;
       }
@@ -12,7 +12,7 @@ class Repair {
   }
 
   isComplete() {
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       if (worker.health < worker.healthMax) {
         return false;
       }
@@ -24,7 +24,7 @@ class Repair {
   run() {
     // TODO: If we have no minerals, stop all workers
 
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       const target = selectRepairTarget(worker);
 
       if (target) {
@@ -41,7 +41,7 @@ function selectRepairTarget(worker) {
   let bestTarget;
   let bestDistance = Infinity;
 
-  for (const one of Fist.workers) {
+  for (const one of Jobs.fist) {
     if (one === worker) continue;
     if (one.health >= one.healthMax) continue;
 

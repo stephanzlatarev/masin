@@ -1,6 +1,6 @@
 import Circuit from "./circuit.js";
-import Fist from "./fist.js";
 import Game from "./game.js";
+import Jobs from "./jobs.js";
 import Lane from "./lane.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
@@ -132,7 +132,7 @@ function findDestinationMineral(pos) {
 function findFirstSection() {
   if (!Units.base) return;
 
-  for (const worker of Fist.workers) {
+  for (const worker of Jobs.fist) {
     if (!didTurn(worker)) continue;
 
     if (calculateDistance(worker.realpos, Units.base.pos) > 6) {

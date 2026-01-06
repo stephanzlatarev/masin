@@ -1,6 +1,6 @@
 import Command from "./command.js";
-import Fist from "./fist.js";
 import Game from "./game.js";
+import Jobs from "./jobs.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 import project from "./projection.js";
@@ -47,7 +47,7 @@ class Strip {
   }
 
   isFistOnStrip() {
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       if (!this.isWorkerOnStrip(worker)) return false;
     }
 

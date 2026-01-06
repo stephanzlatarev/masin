@@ -1,5 +1,5 @@
 import Command from "./command.js";
-import Fist from "./fist.js";
+import Jobs from "./jobs.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
@@ -8,20 +8,20 @@ class Strike {
 
   getTarget() {
     for (const enemy of Units.enemies.values()) {
-      if (isValidTarget(enemy) && canStrike(Fist.workers, enemy)) {
+      if (isValidTarget(enemy) && canStrike(Jobs.fist, enemy)) {
         return enemy;
       }
     }
   }
 
   hit(enemy) {
-    Command.strike(Fist.workers, enemy, Strip.home, Strip.ramp);
+    Command.strike(Jobs.fist, enemy, Strip.home, Strip.ramp);
   }
 
   rally() {
     let isRallying = false;
 
-    for (const worker of Fist.workers) {
+    for (const worker of Jobs.fist) {
       const target = getRallyTarget(worker);
 
       if ((worker.order.abilityId != 295) || Zone.center.includes(worker) || Zone.back.includes(worker)) {
@@ -41,7 +41,7 @@ class Strike {
         "face:", enemy.facing.toFixed(2),
         "health:", enemy.health.toFixed(2),
       );
-      for (const worker of Fist.workers) {
+      for (const worker of Jobs.fist) {
         console.log("-", worker.tag,
           "weapon:", worker.weaponCooldown.toFixed(2),
           "distance:", calculateDistance(worker.pos, enemy.pos).toFixed(2),

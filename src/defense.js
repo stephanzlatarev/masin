@@ -1,4 +1,5 @@
 import Command from "./command.js";
+import Jobs from "./jobs.js";
 import Strip from "./strip.js";
 import Units from "./units.js";
 
@@ -7,16 +8,16 @@ class Defense {
   isDefending;
 
   sync() {
-    const enemy = getEnemyWorker(this.workers);
+    const enemy = getEnemyWorker(Jobs.miners);
 
     if (enemy) {
-      for (const worker of this.workers) {
+      for (const worker of Jobs.miners) {
         Command.attack(worker, enemy);
       }
 
       this.isDefending = true;
     } else if (this.isDefending) {
-      for (const worker of this.workers) {
+      for (const worker of Jobs.miners) {
         Command.harvest(worker, Strip.home);
       }
 

@@ -1,7 +1,7 @@
 import Build from "./build.js";
 import Defense from "./defense.js";
 import Game from "./game.js";
-import Hire from "./hire.js";
+import Jobs from "./jobs.js";
 import Fist from "./fist.js";
 import Lane from "./lane.js";
 import Liftoff from "./liftoff.js";
@@ -28,7 +28,7 @@ export default async function() {
   Units.sync();
   Lane.start();
   Route.start();
-  Hire.start();
+  Jobs.start();
   Build.start();
 
   while (true) {
@@ -36,12 +36,12 @@ export default async function() {
 
     Lane.sync();
     Route.sync();
-    Hire.sync();
+    Jobs.sync();
     Fist.sync();
     Defense.sync();
     Liftoff.sync();
 
-    if (!Fist.workers.length) {
+    if (!Jobs.fist.length) {
       // We lost our fist
       await Game.end();
       break;
