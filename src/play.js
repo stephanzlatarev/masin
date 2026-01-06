@@ -46,7 +46,7 @@ export default async function() {
     Build.sync();
     Shoot.sync();
 
-    if (!Jobs.fist.length && !Jobs.shooter.length) {
+    if (!Jobs.fist.length && !Jobs.shooters.length) {
       // We lost our fist
       await Game.end();
       break;
