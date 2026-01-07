@@ -1,4 +1,5 @@
 import Command from "./command.js";
+import Game from "./game.js";
 import Jobs from "./jobs.js";
 import Units from "./units.js";
 
@@ -11,6 +12,11 @@ class Shoot {
 
         if (target) {
           Command.amove([shooter], target.pos);
+        } else {
+          const x = Game.left + (Game.right - Game.left) * Math.random();
+          const y = Game.top + (Game.bottom - Game.top) * Math.random();
+
+          Command.amove([shooter], { x, y });
         }
       }
     }
