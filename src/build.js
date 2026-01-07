@@ -58,6 +58,8 @@ class Build {
     const depot = getBuilding(UNIT_TYPE_SUPPLYDEPOT);
 
     if (depot && (depot.buildProgress >= 1)) {
+      Command.lower(depot);
+
       Jobs.releaseBuilder();
       this.transition("buildBarracks");
     } else if (!this.builderSupplyDepot) {

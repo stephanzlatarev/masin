@@ -63,6 +63,10 @@ class Command {
     this.commands.push({ unitTags: [facility.tag], abilityId: type });
   }
 
+  lower(depot) {
+    this.commands.push({ unitTags: [depot.tag], abilityId: 556 });
+  }
+
   step() {
     this.commands.length = 0;
   }
