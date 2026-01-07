@@ -26,6 +26,9 @@ class Build {
   }
 
   sync() {
+    if (this.builderSupplyDepot) this.builderSupplyDepot = Units.get(this.builderSupplyDepot.tag);
+    if (this.builderBarracks) this.builderBarracks = Units.get(this.builderBarracks.tag);
+
     this.act();
   }
 
@@ -36,36 +39,58 @@ class Build {
   }
 
   buildSupplyDepot() {
-    if (Game.minerals >= MINERALS_FOR_SUPPLYDEPOT) {
-      Command.build(Jobs.hireBuilder(), BUILD_SUPPLYDEPOT, selectSupplyDepotLocation());
-      this.transition("waitForSupplyDepot");
+    const depot = getBuilding(UNIT_TYPE_SUPPLYDEPOT);
+
+    if (depot && this.builderSupplyDepot) return this.transition("waitForSupplyDepot");
+
+    if (depot || (Game.minerals >= MINERALS_FOR_SUPPLYDEPOT)) {
+      if (!this.builderSupplyDepot) this.builderSupplyDepot = Jobs.hireBuilder();
+
+      if (depot) {
+        Command.resume(this.builderSupplyDepot, depot);
+      } else {
+        Command.build(this.builderSupplyDepot, BUILD_SUPPLYDEPOT, selectSupplyDepotLocation());
+      }
     }
   }
 
   waitForSupplyDepot() {
-    for (const one of Units.units.values()) {
-      if ((one.unitType === UNIT_TYPE_SUPPLYDEPOT) && (one.owner === Game.playerId) && (one.buildProgress >= 1)) {
-        Jobs.releaseBuilder();
-        this.transition("buildBarracks");
-      }
+    const depot = getBuilding(UNIT_TYPE_SUPPLYDEPOT);
+
+    if (depot && (depot.buildProgress >= 1)) {
+      Jobs.releaseBuilder();
+      this.transition("buildBarracks");
+    } else if (!this.builderSupplyDepot) {
+      this.transition("buildSupplyDepot");
     }
   }
 
   buildBarracks() {
-    if (Game.minerals >= MINERALS_FOR_BARRACKS) {
-      Command.build(Jobs.hireBuilder(), BUILD_BARRACKS, selectBarracksLocation());
-      this.transition("waitForBarracks");
+    const barracks = getBuilding(UNIT_TYPE_BARRACKS);
+
+    if (barracks && this.builderBarracks) return this.transition("waitForBarracks");
+
+    if (barracks || (Game.minerals >= MINERALS_FOR_BARRACKS)) {
+      if (!this.builderBarracks) this.builderBarracks = Jobs.hireBuilder();
+
+      if (barracks) {
+        Command.resume(this.builderBarracks, barracks);
+      } else {
+        Command.build(this.builderBarracks, BUILD_BARRACKS, selectBarracksLocation());
+      }
     }
   }
 
   waitForBarracks() {
-    for (const one of Units.units.values()) {
-      if ((one.unitType === UNIT_TYPE_BARRACKS) && (one.owner === Game.playerId) && (one.buildProgress >= 1)) {
-        this.barracks = one;
+    const barracks = getBuilding(UNIT_TYPE_BARRACKS);
 
-        Jobs.releaseBuilder();
-        this.transition("trainMarine");
-      }
+    if (barracks && (barracks.buildProgress >= 1)) {
+      this.barracks = barracks;
+
+      Jobs.releaseBuilder();
+      this.transition("trainMarine");
+    } else if (!this.builderBarracks) {
+      this.transition("buildBarracks");
     }
   }
 
@@ -97,6 +122,14 @@ function selectBarracksLocation() {
   const dy = Math.sign(rally.y - base.y);
 
   return { x: base.x - dx * 4, y: base.y - dy * 4 };
+}
+
+function getBuilding(type) {
+  for (const one of Units.units.values()) {
+    if ((one.unitType === type) && (one.owner === Game.playerId)) {
+      return one;
+    }
+  }
 }
 
 export default new Build();

@@ -55,6 +55,10 @@ class Command {
     this.commands.push({ unitTags: [builder.tag], abilityId: type, targetWorldSpacePos: { x: pos.x, y: pos.y } });
   }
 
+  resume(builder, building) {
+    this.commands.push({ unitTags: [builder.tag], abilityId: 1, targetUnitTag: building.tag });
+  }
+
   train(facility, type) {
     this.commands.push({ unitTags: [facility.tag], abilityId: type });
   }
