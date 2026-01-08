@@ -45,6 +45,7 @@ class Build {
 
     if (depot || (Game.minerals >= MINERALS_FOR_SUPPLYDEPOT)) {
       if (!this.builderSupplyDepot) this.builderSupplyDepot = Jobs.hireBuilder();
+      if (!this.builderSupplyDepot) return;
 
       if (depot) {
         Command.resume(this.builderSupplyDepot, depot);
@@ -74,6 +75,7 @@ class Build {
 
     if (barracks || (Game.minerals >= MINERALS_FOR_BARRACKS)) {
       if (!this.builderBarracks) this.builderBarracks = Jobs.hireBuilder();
+      if (!this.builderBarracks) return;
 
       if (barracks) {
         Command.resume(this.builderBarracks, barracks);
