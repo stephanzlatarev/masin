@@ -12,6 +12,23 @@ const HAS_WEAPONS = {
   289: true, // Broodling
 };
 
+const WEAPONS = {
+  24: { range: 5, dps: 39.2 }, // Bunker with marines
+  45: { range: 0.2, dps: 4.67 }, // SCV
+  49: { range: 5, dps: 10.1 }, // Reaper
+  48: { range: 5, dps: 9.8 }, // Marine
+  66: { range: 7, dps: 22.4 }, // Photon cannon
+  73: { range: 0.1, dps: 18.6 }, // Zealot
+  84: { range: 0.2, dps: 4.67 }, // Probe
+  98: { range: 7, dps: 18.9 }, // Spine crawler
+  104: { range: 0.2, dps: 4.67 }, // Drone
+  105: { range: 0.1, dps: 10 }, // Zergling
+  110: { range: 4, dps: 11.2 }, // Roach
+  126: { range: 5, dps: 11.2 }, // Queen
+  289: { range: 0.1, dps: 7 }, // Broodling
+  311: { range: 4, dps: 13.65 }, // Adept
+};
+
 class Units {
 
   base = null;
@@ -64,6 +81,8 @@ class Units {
 
         units.set(unit.tag, unit);
       } else if (unit.owner === Game.enemy.playerId) {
+        if (unit.buildProgress >= 1) unit.weapon = WEAPONS[unit.unitType];
+
         enemies.set(unit.tag, unit);
         units.set(unit.tag, unit);
       } else if (unit.isMineral) {
