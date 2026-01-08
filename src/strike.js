@@ -34,12 +34,13 @@ class Strike {
     return isRallying;
   }
 
-  monitor(enemy) {
+  monitor(enemy, deadline) {
     try {
       console.log("[strike] target:", enemy.tag,
         "at:", enemy.realpos.x.toFixed(2) + ":" + enemy.realpos.y.toFixed(2), ">", enemy.pos.x.toFixed(2) + ":" + enemy.pos.y.toFixed(2),
         "face:", enemy.facing.toFixed(2),
-        "health:", enemy.health.toFixed(2),
+        "health:", (enemy.health + enemy.shield).toFixed(2),
+        "deadline:", deadline,
       );
       for (const worker of Jobs.fist) {
         console.log("-", worker.tag,

@@ -10,6 +10,7 @@ import Strip from "./strip.js";
 import Units from "./units.js";
 import Zone from "./zone.js";
 
+const STRIKE_DEADLINE = 12;
 const FEW_ENEMY_WORKERS = 3;
 
 class Fist {
@@ -18,6 +19,7 @@ class Fist {
   act = this.move.bind(this);
 
   kills = 0;
+  misses = 0;
   victim = null;
 
   sync() {
@@ -67,8 +69,10 @@ class Fist {
     this.victim = Strike.getTarget();
 
     if (this.victim) {
+      this.deadline = Game.loop + STRIKE_DEADLINE;
+
       Strike.hit(this.victim);
-      Strike.monitor(this.victim);
+      Strike.monitor(this.victim, this.deadline);
 
       return this.transition("strike");
     }
@@ -100,12 +104,19 @@ class Fist {
   }
 
   strike() {
-    if (this.victim) Strike.monitor(this.victim);
+    if (this.victim) Strike.monitor(this.victim, this.deadline);
 
     if (!Units.get(this.victim.tag)) {
       // The victim got killed
       this.kills++;
       this.victim = null;
+      this.deadline = null;
+      this.transition("cooldown");
+    } else if (Game.loop > this.deadline) {
+      // Stop the chase
+      this.misses++;
+      this.victim = null;
+      this.deadline = null;
       this.transition("cooldown");
     }
   }
@@ -193,7 +204,7 @@ class Fist {
     }
 
     console.log("[fist]", (this.mode + "        ").substring(0, 8),
-      "| kills:", this.kills,
+      "| kills:", this.kills, "misses:", this.misses,
       "| health:", Math.floor(total), "(" + Math.floor(min) + "-" + Math.ceil(max) + ")",
     );
   }
