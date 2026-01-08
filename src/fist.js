@@ -39,6 +39,25 @@ class Fist {
   }
 
   move() {
+    if (!Strip.length) {
+      // Kill enemy workers in fire range
+      this.victim = Strike.getTarget();
+
+      if (this.victim) {
+        this.deadline = Game.loop + STRIKE_DEADLINE;
+
+        Strike.hit(this.victim);
+        Strike.monitor(this.victim, this.deadline);
+
+        return this.transition("strike");
+      }
+
+      // Clench fist on early enemy attack
+      if (isEnemyAttackingEarly()) {
+        return Clench.early();
+      }
+    }
+
     Command.head(Jobs.fist, Strip.mineral);
 
     if (Strip.length && (Zone.includes(this) || isEnemyInSight())) {
@@ -122,7 +141,10 @@ class Fist {
   }
 
   cooldown() {
-    if (Strike.rally()) {
+    if (!Strip.length) {
+      // Cooling down from an early enemy attack. Go to enemy base.
+      this.transition("move");
+    } else if (Strike.rally()) {
       // The workers are still rallying
     } else if (Repair.isNeeded()) {
       this.transition("repair");
@@ -211,6 +233,50 @@ class Fist {
 
 }
 
+function isEnemyAttackingEarly() {
+  const enemyDistance = getDistanceToEnemyWorkers();
+
+  if (enemyDistance > 10) return false;
+
+  return (enemyDistance < getDistanceBetweenFingers());
+}
+
+function getDistanceToEnemyWorkers() {
+  let closest = Infinity;
+
+  for (const enemy of Units.enemies.values()) {
+    if (!enemy.isWorker) continue;
+
+    for (const worker of Jobs.fist) {
+      const distance = calculateDistance(enemy.pos, worker.pos);
+
+      if (distance < closest) {
+        closest = distance;
+      }
+    }
+  }
+
+  return closest;
+}
+
+function getDistanceBetweenFingers() {
+  let farthest = 0;
+
+  for (const one of Jobs.fist) {
+    for (const another of Jobs.fist) {
+      if (one === another) continue;
+
+      const distance = calculateDistance(one.pos, another.pos);
+
+      if (distance > farthest) {
+        farthest = distance;
+      }
+    }
+  }
+
+  return farthest;
+}
+
 function isEnemyInSight() {
   for (const enemy of Units.enemies.values()) {
     if (enemy.isWorker) return true;
@@ -253,6 +319,10 @@ function getNearEnemyCount() {
   }
 
   return count;
+}
+
+function calculateDistance(a, b) {
+  return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
 export default new Fist();

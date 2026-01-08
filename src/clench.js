@@ -10,6 +10,33 @@ const ENEMY_MARGIN = 1; // About the radius of a worker and speed
 
 class Clench {
 
+  early() {
+    if (!Jobs.fist.length) return;
+
+    let back = Infinity;
+
+    for (const worker of Jobs.fist) {
+      const projection = Strip.projection(worker);
+
+      worker.projection = projection;
+
+      back = Math.min(projection.s, back);
+    }
+
+    back += CLENCH_MARGIN;
+
+    for (const worker of Jobs.fist) {
+      const projection = worker.projection;
+
+      if (projection.s <= back) {
+        // The worker is at the back of the fist
+        Command.harvest(worker, Strip.mineral, Strip.mineral.pos);
+      } else {
+        Command.harvest(worker, Strip.home, Strip.home.pos);
+      }
+    }
+  }
+
   soft() {
     if (!Jobs.fist.length) return;
 

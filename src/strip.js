@@ -111,7 +111,11 @@ class Strip {
   }
 
   projection(point) {
-    return project(this.ramp, this.mineral.pos, this.length, point.pos || point);
+    if (this.ramp) {
+      return project(this.ramp, this.mineral.pos, this.length, point.pos || point);
+    } else {
+      return project(this.home.pos, this.mineral.pos, 0, point.pos || point);
+    }
   }
 
 }
